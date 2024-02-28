@@ -1,6 +1,6 @@
 import json
 from openai import OpenAI
-client = OpenAI()
+client = OpenAI()  # loads api key from environment variable
 
 
 class LLMPolicy:
