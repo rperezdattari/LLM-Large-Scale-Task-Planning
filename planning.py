@@ -67,7 +67,7 @@ if __name__ == "__main__":
         file_path = f'../llm-mcts/vh/dataset/env_task_set_500_{args.mode}.pik'  # f'../llm-mcts/vh/dataset/env_task_set_10_simple_seen.pik'
         env_task_set = pickle.load(open(file_path, 'rb'))
         executable_args = {
-            'file_name': "./vh/vh_sim/simulation/unity_simulator/v2.3.0/linux_exec.v2.3.0.x86_64",
+            'file_name': "/home/rodrigo/Documents/git/virtualhome/virtualhome/simulation/unity_simulator/v2.3.0/linux_exec.v2.3.0.x86_64",
             'x_display': "1",
             'no_graphics': False
         }
@@ -88,7 +88,7 @@ if __name__ == "__main__":
                                      port_id=2,
                                      env_task_set=None,  # env_task_set,#[env_task_set[0]],
                                      observation_types=['full'],
-                                     use_editor=True,
+                                     use_editor=False,
                                      task_goal=[task_goal],
                                      executable_args=executable_args,
                                      base_port=8084,
