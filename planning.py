@@ -12,6 +12,7 @@ from experiments_info.tasks import tasks
 import os
 from experiments_info.experiments_parameters import experiments
 
+from test_mcts_agents import MCTS_agent
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -20,11 +21,11 @@ def parse_args():
     # MCTC
     parser.add_argument('--exploration_constant', default=24, type=int)
     parser.add_argument('--bonus_constant', default=1, type=int)
-    parser.add_argument('--max_depth', default=20, type=int)
+    parser.add_argument('--max_depth', default=50, type=int)
     parser.add_argument('--round', default=0, type=int)
     parser.add_argument('--simulation_per_act', default=2, type=int)
     parser.add_argument('--discount_factor', default=0.95, type=float)
-    parser.add_argument('--simulation_num', default=200, type=int)
+    parser.add_argument('--simulation_num', default=800, type=int)
     parser.add_argument('--uct_type', default='PUCT', type=str)
     return parser.parse_args()
 
@@ -65,9 +66,9 @@ if __name__ == "__main__":
 
         #### Following lines currently not used
         file_path = f'../llm-mcts/vh/dataset/env_task_set_500_{args.mode}.pik'  # f'../llm-mcts/vh/dataset/env_task_set_10_simple_seen.pik'
-        env_task_set = pickle.load(open(file_path, 'rb'))
+        # env_task_set = pickle.load(open(file_path, 'rb'))
         executable_args = {
-            'file_name': "./vh/vh_sim/simulation/unity_simulator/v2.3.0/linux_exec.v2.3.0.x86_64",
+            'file_name': "/home/zhaoting/miniconda3/envs/llm_filter_planning/lib/python3.8/site-packages/virtualhome/simulation/unity_simulator/linux_exec/linux_exec.v2.3.0.x86_64",
             'x_display': "1",
             'no_graphics': False
         }
@@ -91,7 +92,7 @@ if __name__ == "__main__":
                                      use_editor=True,
                                      task_goal=[task_goal],
                                      executable_args=executable_args,
-                                     base_port=8084,
+                                     base_port=8080,
                                      seed=1)
             # Restart env
             vhenv.reset(task_goal=task_goal, env_id=env_id)
@@ -144,6 +145,24 @@ if __name__ == "__main__":
             elif policy_type == 'LLM':
                 # Init LLM policy
                 llm_policy = LLMPolicy(goal_language)
+            elif policy_type == 'mcts_2': # not done yet
+                args_common = dict(recursive=False,
+                         max_episode_length=5,
+                         num_simulation=100,
+                         max_rollout_steps=5,
+                         c_init=0.1,
+                         c_base=1000000,
+                         num_samples=1,
+                         num_processes=1,
+                         logging=True,
+                         logging_graphs=True)
+
+                args_agent1 = {'agent_id': 0, 'char_index': 0}
+                args_agent1.update(args_common)
+                mcts_agent2 = MCTS_agent(**args_agent1)
+                # print("obs: ", obs)
+                mcts_agent2.reset(obs[0], graph, task_goal)
+                mcts_agent2.get_action(obs[0],  vhenv.get_goal(task_goal, 'full'), None)
             else:
                 raise NameError('Policy type %s does not exist' % policy_type)
 
@@ -169,6 +188,8 @@ if __name__ == "__main__":
                     # Get LLM state and get action
                     state_llm = llm_policy.get_llm_state(obs, selected_objects_id, selected_objects_names)
                     action, response_message = llm_policy.act(state_llm, filtered_valid_actions, LLM_model)
+                elif policy_type == 'mcts_2':
+                    print("not done yet")
                 else:
                     raise NameError('Policy type %s does not exist' % policy_type)
 

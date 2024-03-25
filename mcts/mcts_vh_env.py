@@ -454,7 +454,8 @@ class MCTSVHEnv:
         self.cur_state_graph = self.cur_state.to_dict()
         obs = self.vh_pyenv._mask_state(self.cur_state_graph, 0)
         #plate_ids = []
-        #text_obs = self.graph_to_text(obs)
+        # text_obs = self.graph_to_text(obs)
+        # print("self.cur_state_graph: ", self.cur_state_graph)
         self.history.append(action)
 
         valid_actions = self.get_valid_action([obs])
@@ -467,4 +468,4 @@ class MCTSVHEnv:
         #     done = False
         # else:
         #     done = True
-        return reward, done, self.history, valid_actions
+        return obs, reward, done, self.history, valid_actions

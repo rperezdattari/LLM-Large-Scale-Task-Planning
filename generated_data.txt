@@ -1,0 +1,171 @@
+env_id: 0
+task_name: setup_table
+goals: {'on_plate_231': 0, 'on_waterglass_231': 0, 'on_wineglass_231': 2, 'on_cutleryfork_231': 0}
+['put', 'plate', 'on', '199']
+['put', 'waterglass', 'on', '199']
+['put', 'wineglass', 'on', '199']
+['put', 'cutleryfork', 'on', '199']
+env_id: 1
+task_name: setup_table
+goals: {'on_plate_199': 0, 'on_waterglass_199': 0, 'on_wineglass_199': 2, 'on_cutleryfork_199': 0}
+['put', 'plate', 'on', '135']
+['put', 'waterglass', 'on', '135']
+['put', 'wineglass', 'on', '135']
+['put', 'cutleryfork', 'on', '135']
+env_id: 2
+task_name: setup_table
+goals: {'on_plate_135': 0, 'on_waterglass_135': 0, 'on_wineglass_135': 2, 'on_cutleryfork_135': 0}
+['put', 'plate', 'on', '138']
+['put', 'waterglass', 'on', '138']
+['put', 'wineglass', 'on', '138']
+['put', 'cutleryfork', 'on', '138']
+env_id: 4
+task_name: setup_table
+goals: {'on_plate_138': 0, 'on_waterglass_138': 0, 'on_wineglass_138': 2, 'on_cutleryfork_138': 0}
+['put', 'plate', 'on', '186']
+['put', 'waterglass', 'on', '186']
+['put', 'wineglass', 'on', '186']
+['put', 'cutleryfork', 'on', '186']
+env_id: 5
+task_name: setup_table
+goals: {'on_plate_186': 0, 'on_waterglass_186': 0, 'on_wineglass_186': 2, 'on_cutleryfork_186': 0}
+['put', 'plate', 'on', '231']
+['put', 'waterglass', 'on', '231']
+['put', 'wineglass', 'on', '231']
+['put', 'cutleryfork', 'on', '231']
+env_id: 0
+task_name: setup_table
+goals: {'on_plate_231': 0, 'on_waterglass_231': 0, 'on_wineglass_231': 2, 'on_cutleryfork_231': 0}
+['put', 'plate', 'on', '199']
+['put', 'waterglass', 'on', '199']
+['put', 'wineglass', 'on', '199']
+['put', 'cutleryfork', 'on', '199']
+env_id: 1
+task_name: setup_table
+goals: {'on_plate_199': 0, 'on_waterglass_199': 0, 'on_wineglass_199': 2, 'on_cutleryfork_199': 0}
+['put', 'plate', 'on', '135']
+['put', 'waterglass', 'on', '135']
+['put', 'wineglass', 'on', '135']
+['put', 'cutleryfork', 'on', '135']
+env_id: 2
+task_name: setup_table
+goals: {'on_plate_135': 0, 'on_waterglass_135': 0, 'on_wineglass_135': 2, 'on_cutleryfork_135': 0}
+['put', 'plate', 'on', '138']
+['put', 'waterglass', 'on', '138']
+['put', 'wineglass', 'on', '138']
+['put', 'cutleryfork', 'on', '138']
+env_id: 4
+task_name: setup_table
+goals: {'on_plate_138': 0, 'on_waterglass_138': 0, 'on_wineglass_138': 2, 'on_cutleryfork_138': 0}
+['put', 'plate', 'on', '186']
+['put', 'waterglass', 'on', '186']
+['put', 'wineglass', 'on', '186']
+['put', 'cutleryfork', 'on', '186']
+env_id: 5
+task_name: setup_table
+goals: {'on_plate_186': 0, 'on_waterglass_186': 0, 'on_wineglass_186': 2, 'on_cutleryfork_186': 0}
+['put', 'plate', 'on', '231']
+['put', 'waterglass', 'on', '231']
+['put', 'wineglass', 'on', '231']
+['put', 'cutleryfork', 'on', '231']
+env_id: 0
+task_name: setup_table
+goals: {'on_plate_231': 0, 'on_waterglass_231': 0, 'on_wineglass_231': 2, 'on_cutleryfork_231': 0}
+['put', 'plate', 'on', '199']
+['put', 'waterglass', 'on', '199']
+['put', 'wineglass', 'on', '199']
+['put', 'cutleryfork', 'on', '199']
+env_id: 1
+task_name: setup_table
+goals: {'on_plate_199': 0, 'on_waterglass_199': 0, 'on_wineglass_199': 2, 'on_cutleryfork_199': 0}
+['put', 'plate', 'on', '135']
+['put', 'waterglass', 'on', '135']
+['put', 'wineglass', 'on', '135']
+['put', 'cutleryfork', 'on', '135']
+env_id: 2
+task_name: setup_table
+goals: {'on_plate_135': 0, 'on_waterglass_135': 0, 'on_wineglass_135': 2, 'on_cutleryfork_135': 0}
+['put', 'plate', 'on', '138']
+['put', 'waterglass', 'on', '138']
+['put', 'wineglass', 'on', '138']
+['put', 'cutleryfork', 'on', '138']
+env_id: 4
+task_name: setup_table
+goals: {'on_plate_138': 0, 'on_waterglass_138': 0, 'on_wineglass_138': 2, 'on_cutleryfork_138': 0}
+['put', 'plate', 'on', '186']
+['put', 'waterglass', 'on', '186']
+['put', 'wineglass', 'on', '186']
+['put', 'cutleryfork', 'on', '186']
+env_id: 5
+task_name: setup_table
+goals: {'on_plate_186': 0, 'on_waterglass_186': 0, 'on_wineglass_186': 2, 'on_cutleryfork_186': 0}
+['put', 'plate', 'on', '231']
+['put', 'waterglass', 'on', '231']
+['put', 'wineglass', 'on', '231']
+['put', 'cutleryfork', 'on', '231']
+env_id: 0
+task_name: setup_table
+goals: {'on_plate_231': 0, 'on_waterglass_231': 0, 'on_wineglass_231': 2, 'on_cutleryfork_231': 0}
+['put', 'plate', 'on', '199']
+['put', 'waterglass', 'on', '199']
+['put', 'wineglass', 'on', '199']
+['put', 'cutleryfork', 'on', '199']
+env_id: 1
+task_name: setup_table
+goals: {'on_plate_199': 0, 'on_waterglass_199': 0, 'on_wineglass_199': 2, 'on_cutleryfork_199': 0}
+['put', 'plate', 'on', '135']
+['put', 'waterglass', 'on', '135']
+['put', 'wineglass', 'on', '135']
+['put', 'cutleryfork', 'on', '135']
+env_id: 2
+task_name: setup_table
+goals: {'on_plate_135': 0, 'on_waterglass_135': 0, 'on_wineglass_135': 2, 'on_cutleryfork_135': 0}
+['put', 'plate', 'on', '138']
+['put', 'waterglass', 'on', '138']
+['put', 'wineglass', 'on', '138']
+['put', 'cutleryfork', 'on', '138']
+env_id: 4
+task_name: setup_table
+goals: {'on_plate_138': 0, 'on_waterglass_138': 0, 'on_wineglass_138': 2, 'on_cutleryfork_138': 0}
+['put', 'plate', 'on', '186']
+['put', 'waterglass', 'on', '186']
+['put', 'wineglass', 'on', '186']
+['put', 'cutleryfork', 'on', '186']
+env_id: 5
+task_name: setup_table
+goals: {'on_plate_186': 0, 'on_waterglass_186': 0, 'on_wineglass_186': 2, 'on_cutleryfork_186': 0}
+['put', 'plate', 'on', '231']
+['put', 'waterglass', 'on', '231']
+['put', 'wineglass', 'on', '231']
+['put', 'cutleryfork', 'on', '231']
+env_id: 0
+task_name: setup_table
+goals: {'on_plate_231': 0, 'on_waterglass_231': 0, 'on_wineglass_231': 2, 'on_cutleryfork_231': 0}
+['put', 'plate', 'on', '199']
+['put', 'waterglass', 'on', '199']
+['put', 'wineglass', 'on', '199']
+['put', 'cutleryfork', 'on', '199']
+env_id: 1
+task_name: setup_table
+goals: {'on_plate_199': 0, 'on_waterglass_199': 0, 'on_wineglass_199': 2, 'on_cutleryfork_199': 0}
+['put', 'plate', 'on', '135']
+['put', 'waterglass', 'on', '135']
+['put', 'wineglass', 'on', '135']
+['put', 'cutleryfork', 'on', '135']
+env_id: 2
+task_name: setup_table
+goals: {'on_plate_135': 0, 'on_waterglass_135': 0, 'on_wineglass_135': 2, 'on_cutleryfork_135': 0}
+['put', 'plate', 'on', '138']
+['put', 'waterglass', 'on', '138']
+['put', 'wineglass', 'on', '138']
+['put', 'cutleryfork', 'on', '138']
+env_id: 4
+task_name: setup_table
+goals: {'on_plate_138': 0, 'on_waterglass_138': 0, 'on_wineglass_138': 2, 'on_cutleryfork_138': 0}
+['put', 'plate', 'on', '186']
+['put', 'waterglass', 'on', '186']
+['put', 'wineglass', 'on', '186']
+['put', 'cutleryfork', 'on', '186']
+env_id: 5
+task_name: setup_table
+goals: {'on_plate_186': 0, 'on_waterglass_186': 0, 'on_wineglass_186': 2, 'on_cutleryfork_186': 0}

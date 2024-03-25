@@ -7,8 +7,238 @@ from collections import defaultdict
 from mcts.mcts_vh_env import MCTSVHEnv
 from environment.utils_environment import filter_valid_actions
 
+import ipdb 
+
+import random
+import copy
 DISCOUNT_FACTOR = 0.95
 
+####################################### Heuristic ##################################################
+
+def find_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, object_target):
+    # observations = simulator.get_observations(env_graph, char_index=char_index)
+    observations = simulator.get_observations()
+
+    id2node = {node['id']: node for node in env_graph['nodes']}
+    containerdict = {edge['from_id']: edge['to_id'] for edge in env_graph['edges'] if edge['relation_type'] == 'INSIDE'}
+    target = int(object_target.split('_')[-1])
+    observation_ids = [x['id'] for x in observations['nodes']]
+    try:
+        room_char = [edge['to_id'] for edge in env_graph['edges'] if edge['from_id'] == agent_id and edge['relation_type'] == 'INSIDE'][0]
+    except:
+        print('Error')
+        #ipdb.set_trace()
+
+    action_list = []
+    cost_list = []
+    # if target == 478:
+    #     ipdb.set_trace()
+    while target not in observation_ids:
+        try:
+            container = containerdict[target]
+        except:
+            print(id2node[target])
+            #ipdb.set_trace()
+        # If the object is a room, we have to walk to what is insde
+
+        if id2node[container]['category'] == 'Rooms':
+            action_list = [('walk', (id2node[target]['class_name'], target), None)] + action_list 
+            cost_list = [0.5] + cost_list
+        
+        elif 'CLOSED' in id2node[container]['states'] or ('OPEN' not in id2node[container]['states']):
+            action = ('open', (id2node[container]['class_name'], container), None)
+            action_list = [action] + action_list
+            cost_list = [0.05] + cost_list
+
+        target = container
+    
+    ids_character = [x['to_id'] for x in observations['edges'] if
+                     x['from_id'] == agent_id and x['relation_type'] == 'CLOSE'] + \
+                    [x['from_id'] for x in observations['edges'] if
+                     x['to_id'] == agent_id and x['relation_type'] == 'CLOSE']
+
+    if target not in ids_character:
+        # If character is not next to the object, walk there
+        action_list = [('walk', (id2node[target]['class_name'], target), None)]+ action_list
+        cost_list = [1] + cost_list
+
+    return action_list, cost_list
+
+def grab_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, object_target):
+    # observations = simulator.get_observations(env_graph, char_index=char_index)
+    observations = simulator.get_observations()
+    target_id = int(object_target.split('_')[-1])
+
+    observed_ids = [node['id'] for node in observations['nodes']]
+    agent_close = [edge for edge in env_graph['edges'] if ((edge['from_id'] == agent_id and edge['to_id'] == target_id) or (edge['from_id'] == target_id and edge['to_id'] == agent_id) and edge['relation_type'] == 'CLOSE')]
+    grabbed_obj_ids = [edge['to_id'] for edge in env_graph['edges'] if (edge['from_id'] == agent_id and 'HOLDS' in edge['relation_type'])]
+
+    target_node = [node for node in env_graph['nodes'] if node['id'] == target_id][0]
+
+    if target_id not in grabbed_obj_ids:
+        target_action = [('grab', (target_node['class_name'], target_id), None)]
+        cost = [0.05]
+    else:
+        target_action = []
+        cost = []
+
+    if len(agent_close) > 0 and target_id in observed_ids:
+        return target_action, cost
+    else:
+        find_actions, find_costs = find_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, object_target)
+        return find_actions + target_action, find_costs + cost
+
+def put_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, target):
+    # observations = simulator.get_observations(env_graph, char_index=char_index)
+    observations = simulator.get_observations()
+
+    target_grab, target_put = [int(x) for x in target.split('_')[-2:]]
+
+    if sum([1 for edge in observations['edges'] if edge['from_id'] == target_grab and edge['to_id'] == target_put and edge['relation_type'] == 'ON']) > 0:
+        # Object has been placed
+        return [], []
+
+    if sum([1 for edge in observations['edges'] if edge['to_id'] == target_grab and edge['from_id'] != agent_id and 'HOLD' in edge['relation_type']]) > 0:
+        # Object has been placed
+        return None, None
+
+    target_node = [node for node in env_graph['nodes'] if node['id'] == target_grab][0]
+    target_node2 = [node for node in env_graph['nodes'] if node['id'] == target_put][0]
+    id2node = {node['id']: node for node in env_graph['nodes']}
+    target_grabbed = len([edge for edge in env_graph['edges'] if edge['from_id'] == agent_id and 'HOLDS' in edge['relation_type'] and edge['to_id'] == target_grab]) > 0
+
+
+    object_diff_room = None
+    if not target_grabbed:
+        grab_obj1, cost_grab_obj1 = grab_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, 'grab_' + str(target_node['id']))
+        if len(grab_obj1) > 0:
+            if grab_obj1[0][0] == 'walk':
+                id_room = grab_obj1[0][1][1]
+                if id2node[id_room]['category'] == 'Rooms':
+                    object_diff_room = id_room
+        
+        env_graph_new = copy.deepcopy(env_graph)
+        
+        if object_diff_room:
+            env_graph_new['edges'] = [edge for edge in env_graph_new['edges'] if edge['to_id'] != agent_id and edge['from_id'] != agent_id]
+            env_graph_new['edges'].append({'from_id': agent_id, 'to_id': object_diff_room, 'relation_type': 'INSIDE'})
+        
+        else:
+            env_graph_new['edges'] = [edge for edge in env_graph_new['edges'] if (edge['to_id'] != agent_id and edge['from_id'] != agent_id) or edge['relation_type'] == 'INSIDE']
+    else:
+        env_graph_new = env_graph
+        grab_obj1 = []
+        cost_grab_obj1 = []
+    find_obj2, cost_find_obj2 = find_heuristic(agent_id, char_index, unsatisfied, env_graph_new, simulator, 'find_' + str(target_node2['id']))
+    action = [('putback', (target_node['class_name'], target_grab), (target_node2['class_name'], target_put))]
+    cost = [0.05]
+    res = grab_obj1 + find_obj2 + action
+    cost_list = cost_grab_obj1 + cost_find_obj2 + cost
+
+    #print(res, target)
+    return res, cost_list
+
+def putIn_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, target):
+    observations = simulator.get_observations(env_graph, char_index=char_index)
+
+    target_grab, target_put = [int(x) for x in target.split('_')[-2:]]
+
+    if sum([1 for edge in observations['edges'] if edge['from_id'] == target_grab and edge['to_id'] == target_put and edge['relation_type'] == 'ON']) > 0:
+        # Object has been placed
+        return [], []
+
+    if sum([1 for edge in observations['edges'] if edge['to_id'] == target_grab and edge['from_id'] != agent_id and 'HOLD' in edge['relation_type']]) > 0:
+        # Object has been placed
+        return None, None
+
+    target_node = [node for node in env_graph['nodes'] if node['id'] == target_grab][0]
+    target_node2 = [node for node in env_graph['nodes'] if node['id'] == target_put][0]
+    id2node = {node['id']: node for node in env_graph['nodes']}
+    target_grabbed = len([edge for edge in env_graph['edges'] if edge['from_id'] == agent_id and 'HOLDS' in edge['relation_type'] and edge['to_id'] == target_grab]) > 0
+
+
+    object_diff_room = None
+    if not target_grabbed:
+        grab_obj1, cost_grab_obj1 = grab_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, 'grab_' + str(target_node['id']))
+        if len(grab_obj1) > 0:
+            if grab_obj1[0][0] == 'walk':
+                id_room = grab_obj1[0][1][1]
+                if id2node[id_room]['category'] == 'Rooms':
+                    object_diff_room = id_room
+        
+        env_graph_new = copy.deepcopy(env_graph)
+        
+        if object_diff_room:
+            env_graph_new['edges'] = [edge for edge in env_graph_new['edges'] if edge['to_id'] != agent_id and edge['from_id'] != agent_id]
+            env_graph_new['edges'].append({'from_id': agent_id, 'to_id': object_diff_room, 'relation_type': 'INSIDE'})
+        
+        else:
+            env_graph_new['edges'] = [edge for edge in env_graph_new['edges'] if (edge['to_id'] != agent_id and edge['from_id'] != agent_id) or edge['relation_type'] == 'INSIDE']
+    else:
+        env_graph_new = env_graph
+        grab_obj1 = []
+        cost_grab_obj1 = []
+    find_obj2, cost_find_obj2 = find_heuristic(agent_id, char_index, unsatisfied, env_graph_new, simulator, 'find_' + str(target_node2['id']))
+    target_put_state = target_node2['states']
+    action_open = [('open', (target_node2['class_name'], target_put))]
+    action_put = [('putin', (target_node['class_name'], target_grab), (target_node2['class_name'], target_put))]
+    cost_open = [0.05]
+    cost_put = [0.05]
+    
+
+    remained_to_put = 0
+    for predicate, count in unsatisfied.items():
+        if predicate.startswith('inside'):
+            remained_to_put += count
+    if remained_to_put == 1: # or agent_id > 1:
+        action_close= []
+        cost_close = []
+    else:
+        action_close = [('close', (target_node2['class_name'], target_put))]
+        cost_close = [0.05]
+
+    if 'CLOSED' in target_put_state or 'OPEN' not in target_put_state:
+        res = grab_obj1 + find_obj2 + action_open + action_put + action_close
+        cost_list = cost_grab_obj1 + cost_find_obj2 + cost_open + cost_put + cost_close
+    else:
+        res = grab_obj1 + find_obj2 + action_put + action_close
+        cost_list = cost_grab_obj1 + cost_find_obj2 + cost_put + cost_close
+
+    #print(res, target)
+    return res, cost_list
+
+
+def turnOn_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, object_target):
+    observations = simulator.get_observations(env_graph, char_index=char_index)
+    target_id = int(object_target.split('_')[-1])
+
+    observed_ids = [node['id'] for node in observations['nodes']]
+    agent_close = [edge for edge in env_graph['edges'] if ((edge['from_id'] == agent_id and edge['to_id'] == target_id) or (edge['from_id'] == target_id and edge['to_id'] == agent_id) and edge['relation_type'] == 'CLOSE')]
+    grabbed_obj_ids = [edge['to_id'] for edge in env_graph['edges'] if (edge['from_id'] == agent_id and 'HOLDS' in edge['relation_type'])]
+
+    target_node = [node for node in env_graph['nodes'] if node['id'] == target_id][0]
+
+    if target_id not in grabbed_obj_ids:
+        target_action = [('switchon', (target_node['class_name'], target_id), None)]
+        cost = [0.05]
+    else:
+        target_action = []
+        cost = []
+
+    if len(agent_close) > 0 and target_id in observed_ids:
+        return target_action, cost
+    else:
+        find_actions, find_costs = find_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, object_target)
+        return find_actions + target_action, find_costs + cost
+
+heuristic_dict = {
+        'find': find_heuristic,
+        'grab': grab_heuristic,
+        'put': put_heuristic,
+        'putIn': putIn_heuristic,
+        # 'sit': sit_heuristic,
+        'turnOn': turnOn_heuristic
+    }
 
 class StateNode:
     def __init__(self, reward=0, done=False):
@@ -33,6 +263,7 @@ class StateNode:
         self.done = done
         self.predicted_reward = 0
         self.use_llm = False
+        self.expand_node = False
 
 
 class ActionNode:
@@ -98,20 +329,69 @@ class MCTSAgent:
         :return: best action
         '''
         #init_history = history.copy()
-        self.root = self.build_state(valid_actions, done)
+        obs = self.env.reset()
+        self.root = self.build_state(obs, valid_actions, done)
         sim_steps = 0
+        # satisfied_task_goal = {key: [] for key in self.env.task_goal[0].keys()}  # save the whether the goal are satisfied, will be updated later
         for _ in tqdm(range(self.simulation_num)):
+            # # find_actions, find_costs = find_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, object_target)
+            # print("self.selected_objects_id: ", self.selected_objects_id)
+            # print("self.env.task_goal: ", self.env.task_goal)
+            # print("goal_spec: ", self.env.goal_spec)
+            # find_actions, find_costs = find_heuristic(0, 0, False, self.env.cur_state_graph, self.env.vh_pyenv, 'on_wineglass_231')
+            # print("find_actions: ", find_actions)
+            # put_actions, find_costs = put_heuristic(0, 0, False, self.env.cur_state_graph, self.env.vh_pyenv, 'put_298_231')
+            # print("grab_actions: ", put_actions)
+            # # get_subgoal_space(self, state, satisfied, unsatisfied, opponent_subgoal=None, verbose=0):
+            # # sub_goal_spaces = self.get_subgoal_space(self.env.cur_state_graph, { 'on_wineglass_231': 0}, { 'on_wineglass_231': 2})
+            # sub_goal_spaces = self.get_subgoal_space(self.env.cur_state_graph, satisfied_task_goal, self.env.task_goal[0])
+            # print("sub_goal_spaces: ", sub_goal_spaces)
+            # goals_expanded = 0
+            # actions_str = []
+            # for goal_predicate in sub_goal_spaces:
+            #     goal, predicate, aug_predicate = goal_predicate[0], goal_predicate[1], goal_predicate[2] # subgoal, goal predicate, the new satisfied predicate
+            #     heuristic = heuristic_dict[goal.split('_')[0]]
+            #     actions_heuristic, costs = heuristic(0, 0,  None, self.env.cur_state_graph, self.env.vh_pyenv, goal)
+            #     if actions_heuristic is None:
+            #         continue
+            #     cost = sum(costs)
+            #     # print(goal_predicate, cost)
+            #     # next_vh_state = vh_state
+            #     # actions_str = []
+            #     for action in actions_heuristic:
+            #         action_str = self.get_action_str(action)
+            #         actions_str.append(action_str)
+            #         # print([edge for edge in state['edges'] if edge['from_id'] == int(goal.split('_')[1])])
+            #         # print(goal_predicate, action_str)
+            #         # TODO: this could just be computed in the heuristics?
+            #         # next_vh_state = self.env.transition(next_vh_state, {0: action_str})
+            #         print("action_str: ", action_str)
+            #         obs, reward, done, history, valid_actions = self.env.step(action_str)
+            #         if done:
+            #             return actions_str, sim_steps
+
+            #         print("done: ",done)                
+            #     goals_expanded += 1
+
+            #     # next_satisfied = copy.deepcopy(satisfied)
+            #     # next_unsatisfied = copy.deepcopy(unsatisfied)
+            # #     if aug_predicate is not None:
+            # #         next_satisfied[predicate].append(aug_predicate)
+            # # next_unsatisfied[predicate] -= 1
+            # # ipdb.set_trace()
             self.env.reset()
+            self.last_history = []
             #self.env.history = init_history.copy()
             R, root, history  = self.simulate(self.root, 0)
             sim_steps += 1
-            if self.done:
+            if self.done:  # if success, the action returned is the history
                 return history, sim_steps
-            self.root = root
+            # self.root = root
         # select best action by Q-value
         best_action_node_idx = self.greedy_action_node(self.root, 0, 0, if_print=True)
         # select best action by Count
         best_action_node = self.root.children[best_action_node_idx]
+        print("best action node: ", best_action_node)
         self.root.best_action_node = best_action_node
         return None, sim_steps #self.root.best_action_node.action
 
@@ -119,7 +399,10 @@ class MCTSAgent:
     def state_id(history: list):
         return ' '.join(history)
 
-    def build_state(self, valid_actions, done, reward=0, prev_action='<s>'):
+    # expand node by taking all the possible actions
+    def expand_node(self, current_state_node, valid_actions, done, reward=0, prev_action='<s>'):
+        current_state_node.is_expanded = True
+
         state = StateNode()
         # state.ob = ob
         # state.state = ob
@@ -141,25 +424,86 @@ class MCTSAgent:
 
         return state
 
+    def build_state(self, obs, valid_actions, done, reward=0, prev_action='<s>'):
+        state = StateNode()
+        state.ob = obs
+        # state.state = ob
+        state.done = done
+        state.reward = reward
+        state.prev_action = prev_action
+        # state.history = history
+        # state.id = self.state_id(history)
+        state.valid_actions = valid_actions
+
+        state.children_probs = np.ones((len(state.valid_actions),)) / len(state.valid_actions)
+            
+        self.state_dict[state.id] = state
+        for valid_action in state.valid_actions:
+            if isinstance(state.valid_actions, dict):
+                state.children.append(ActionNode(state.valid_actions[valid_action]))
+            else:
+                state.children.append(ActionNode(valid_action))
+
+        return state
+
+    def check_wether_already_in_tree(self, new_obs, state_node):
+        # only check current branch
+        check_number = 0
+        while state_node.parent is not None:
+            check_number = check_number + 1
+            print("check_wether_already_in_tree ")
+            state_obs = state_node.ob
+            if state_obs == new_obs:
+                print("-----------------------same state before !!! -------------------------")
+                return True, state_node
+            state_node = state_node.parent
+            if check_number > 100:
+                return False, None
+        return False, None
+
+
     def simulate(self, state_node, depth):
         if state_node.done or depth == self.max_depth:
             return 0, state_node, self.last_history
 
+        print("SIMULATE: state_node:  child number: ", len(state_node.children), " action: ", state_node.valid_actions)
         best_action_node_idx = self.greedy_action_node(state_node, self.exploration_constant, self.bonus_constant)
         best_action_node = state_node.children[best_action_node_idx]
-        #rollout_next = False
-        reward, done, history, valid_actions = self.env.step(best_action_node.action)
+        rollout_next = False
+        print("best action node.action: ", best_action_node.action)
+        obs, reward, done, history, valid_actions = self.env.step(best_action_node.action)
+        if done:
+            print("done!")
+            self.last_history = history
+            self.done = True
+            return 0, state_node, self.last_history
+        print('len of self.last_history: ', len(self.last_history), 'len of history: ', len(history))
+        # print("history: ", history)
+        if len(history) > 100:
+            return 0, state_node, self.last_history
         next_state_id = self.state_id(history)
-        if next_state_id == best_action_node.children_id:
+        # print("next_state_id ", next_state_id, " history: ", history)
+        print("next_state_id ", next_state_id)
+        print("depth: ", depth)
+        # if next_state_id == best_action_node.children_id:
+        print("best_action_node.children: ", best_action_node.children)
+        flag_same_state, same_state_previous= self.check_wether_already_in_tree(obs, state_node)
+        if flag_same_state:
+            best_action_node.children = same_state_previous
+            next_state_node = same_state_previous
+            rollout_next = False
+        elif best_action_node.children is not None: 
+            # [To do] check whether the state is in the current tree
             #next_state_node = best_action_node.children
-            next_state_node = self.build_state(valid_actions, done, reward, prev_action=best_action_node.action)
+            # next_state_node = self.build_state(obs, valid_actions, done, reward, prev_action=best_action_node.action)
+            next_state_node = best_action_node.children
             next_state_node.parent = state_node
-            rollout_next = True
+            rollout_next = False
         else: 
-            next_state_node = self.build_state(valid_actions, done, reward, prev_action=best_action_node.action)
+            next_state_node = self.build_state(obs, valid_actions, done, reward, prev_action=best_action_node.action)
             next_state_node.parent = state_node
-            best_action_node.children = next_state_node
-            best_action_node.children_id = next_state_node.id
+            state_node.children[best_action_node_idx].children = next_state_node
+            state_node.children[best_action_node_idx].children_id = next_state_node.id
             rollout_next = True
 
         if rollout_next:
@@ -169,14 +513,16 @@ class MCTSAgent:
                 rollout_r.append(random_r)
             R = sum(rollout_r)/len(rollout_r)
         else:
-            r, next_state_node = self.simulate(next_state_node, depth+1)
+            # r, next_state_node = self.simulate(next_state_node, depth+1)
+            r, next_state_node, _ = self.simulate(next_state_node, 0)
             R = reward + self.discount_factor * r
 
+        # [To do]backprogration, also change N and Q for all the parents node
         state_node.N += 1
-        best_action_node.N += 1
-        best_action_node.children = next_state_node
-        best_action_node.Rs.append(R)
-        best_action_node.Q = np.sum(np.array(best_action_node.Rs) * utils.softmax(best_action_node.Rs, T=10))
+        state_node.children[best_action_node_idx].N += 1
+        state_node.children[best_action_node_idx].children = next_state_node
+        state_node.children[best_action_node_idx].Rs.append(R)
+        state_node.children[best_action_node_idx].Q = np.sum(np.array(state_node.children[best_action_node_idx].Rs) * utils.softmax(state_node.children[best_action_node_idx].Rs, T=10))
         state_node.best_action_node = best_action_node
         return R, state_node, self.last_history
 
@@ -191,12 +537,13 @@ class MCTSAgent:
         count_based_probs = children_count ** (1/self.action_selection_temp) / (np.sum(children_count ** (1/self.action_selection_temp)))
         return np.random.choice(state_node.children, p=count_based_probs)
 
-    def greedy_action_node(self, state_node, exploration_constant, bonus_constant, if_print=False):
+    def greedy_action_node(self, state_node, exploration_constant, bonus_constant, if_print=True):
         best_value = -np.inf
         best_children = []
         best_children_prob = []
         for i in range(len(state_node.children)):
             child = state_node.children[i]
+            # print("i: ", i, " child node: ", state_node.children_probs)
             assert len(state_node.children_probs) == len(state_node.children), print(state_node.children_probs)
             child_prob = state_node.children_probs[i]
             
@@ -252,7 +599,14 @@ class MCTSAgent:
                 if c.N > 0:
                     print(c.action, c.Q, c.N)
         best_children_prob = np.array(best_children_prob) / np.sum(best_children_prob)
-        output_action_index = np.argmax(best_children_prob)
+        # [To do] if multiple has same argmax, randomly choose one
+        # output_action_index = np.argmax(best_children_prob)
+        # return best_children[output_action_index]
+        print("best_children_prob: ", best_children_prob)
+        max_prob_indices = np.flatnonzero(best_children_prob == best_children_prob.max())
+        # Randomly choose one of the indices with the maximum value
+        output_action_index = np.random.choice(max_prob_indices)
+        # Use the randomly chosen index to select the corresponding action
         return best_children[output_action_index]
 
     def rollout(self, state_node, depth):
@@ -263,7 +617,9 @@ class MCTSAgent:
 
         action = action_node.action
 
-        reward, done, history, valid_actions = self.env.step(action)
+        print("possible action: ", len(state_node.children),  "rollout action: ", action)
+
+        obs, reward, done, history, valid_actions = self.env.step(action)
         self.last_history = history
 
         if self.selected_objects_id is not None:  # this means filter objects is False
@@ -277,10 +633,210 @@ class MCTSAgent:
         if next_state_id == action_node.children_id:
             next_state_node = action_node.children
         else:
-            next_state_node = self.build_state(valid_actions, done, reward, prev_action=action)
-            next_state_node.parent = state_node
-            action_node.children = next_state_node
-            action_node.children_id = next_state_node.id
+            next_state_node = self.build_state(obs, valid_actions, done, reward, prev_action=action)
+            # next_state_node.parent = state_node
+            # action_node.children = next_state_node
+            # action_node.children_id = next_state_node.id
 
         r = reward + self.discount_factor * self.rollout(next_state_node, depth+1)
         return r
+    
+    def get_action_str(self, action_tuple):
+        obj_args = [x for x in list(action_tuple)[1:] if x is not None]
+        objects_str = ' '.join(['<{}> ({})'.format(x[0], x[1]) for x in obj_args])
+        return '[{}] {}'.format(action_tuple[0], objects_str)
+    
+    def get_subgoal_space(self, state, satisfied, unsatisfied, opponent_subgoal=None, verbose=0):
+        """
+        Get subgoal space
+        Args:
+            state: current state
+            satisfied: satisfied predicates
+            unsatisfied: # of unstatisified predicates
+        Returns:
+            subgoal space
+        """
+        """TODO: add more subgoal heuristics; currently only have (put x y)"""
+        # print('get subgoal space, state:\n', state['nodes'])
+        char_index = 0
+        agent_id = 0
+        obs = self.env.vh_pyenv._mask_state(state, char_index)
+        obsed_objs = [node["id"] for node in obs["nodes"]]
+
+        inhand_objects = []
+        for edge in state['edges']:
+            if edge['relation_type'].startswith('HOLDS') and \
+                edge['from_id'] == agent_id:
+                inhand_objects.append(edge['to_id'])
+        inhand_objects_opponent = []
+        for edge in state['edges']:
+            if edge['relation_type'].startswith('HOLDS') and \
+                edge['from_id'] == 3 - agent_id:
+                inhand_objects_opponent.append(edge['to_id'])
+
+        # if verbose:
+        #     print('inhand_objects:', inhand_objects)
+        #     print(state['edges'])
+
+        id2node = {node['id']: node for node in state['nodes']}
+
+        opponent_predicate_1 = None
+        opponent_predicate_2 = None
+        if opponent_subgoal is not None:
+            elements = opponent_subgoal.split('_')
+            if elements[0] in ['put', 'putIn']:
+                obj1_class = None
+                for node in state['nodes']:
+                    if node['id'] == int(elements[1]):
+                        obj1_class = node['class_name']
+                        break
+                # if obj1_class is None:
+                #     opponent_subgoal = None
+                # else:
+                opponent_predicate_1 = '{}_{}_{}'.format('on' if elements[0] == 'put' else 'inside', obj1_class, elements[2])
+                opponent_predicate_2 = '{}_{}_{}'.format('on' if elements[0] == 'put' else 'inside', elements[1], elements[2])
+
+        subgoal_space, obsed_subgoal_space, overlapped_subgoal_space = [], [], []
+        for predicate, count in unsatisfied.items():
+            if count > 1 or count > 0 and predicate not in [opponent_predicate_1, opponent_predicate_2]:
+                elements = predicate.split('_')
+                # print(elements)
+                if elements[0] == 'on':
+                    subgoal_type = 'put'
+                    obj = elements[1]
+                    surface = elements[2] # assuming it is a graph node id
+                    print("obj: ", obj, " surface: ", surface)
+                    for node in state['nodes']:
+                        if node['class_name'] == obj or str(node['id']) == obj:
+                            print(node)
+                            # if verbose:
+                            #     print(node)
+                            tmp_predicate = 'on_{}_{}'.format(node['id'], surface) 
+                            print("tmp_predicate: ", tmp_predicate)
+                            # ipdb.set_trace()
+                            if tmp_predicate not in satisfied[predicate]:
+                            # if True:
+                                tmp_subgoal = '{}_{}_{}'.format(subgoal_type, node['id'], surface)
+                                if tmp_subgoal != opponent_subgoal:
+                                    subgoal_space.append(['{}_{}_{}'.format(subgoal_type, node['id'], surface), predicate, tmp_predicate])
+                                    if node['id'] in obsed_objs:
+                                        obsed_subgoal_space.append(['{}_{}_{}'.format(subgoal_type, node['id'], surface), predicate, tmp_predicate])
+                                    if node['id'] in inhand_objects:
+                                        return [subgoal_space[-1]]
+                elif elements[0] == 'inside':
+                    subgoal_type = 'putIn'
+                    obj = elements[1]
+                    surface = elements[2] # assuming it is a graph node id
+                    for node in state['nodes']:
+                        if node['class_name'] == obj or str(node['id']) == obj:
+                            # if verbose:
+                            #     print(node)
+                            tmp_predicate = 'inside_{}_{}'.format(node['id'], surface) 
+                            if tmp_predicate not in satisfied[predicate]:
+                                tmp_subgoal = '{}_{}_{}'.format(subgoal_type, node['id'], surface)
+                                if tmp_subgoal != opponent_subgoal:
+                                    subgoal_space.append(['{}_{}_{}'.format(subgoal_type, node['id'], surface), predicate, tmp_predicate])
+                                    if node['id'] in obsed_objs:
+                                        obsed_subgoal_space.append(['{}_{}_{}'.format(subgoal_type, node['id'], surface), predicate, tmp_predicate])
+                                    if node['id'] in inhand_objects:
+                                        return [subgoal_space[-1]]
+                elif elements[0] == 'offOn':
+                    if id2node[elements[2]]['class_name'] in ['dishwasher', 'kitchentable']:
+                        containers = [[node['id'], node['class_name']] for node in state['nodes'] if node['class_name'] in ['kitchencabinets', 'kitchencounterdrawer', 'kitchencounter']]
+                    else:
+                        containers = [[node['id'], node['class_name']] for node in state['nodes'] if node['class_name'] == 'coffetable']
+                    for edge in state['edges']:
+                        if edge['relation_type'] == 'ON' and edge['to_id'] == int(elements[2]) and id2node[edge['from_id']]['class_name'] == elements[1]:
+                            container = random.choice(containers)
+                            predicate = '{}_{}_{}'.format('on' if container[1] == 'kitchencounter' else 'inside', edge['from_id'], container[0])
+                            goals[predicate] = 1
+                elif elements[0] == 'offInside':
+                    if id2node[elements[2]]['class_name'] in ['dishwasher', 'kitchentable']:
+                        containers = [[node['id'], node['class_name']] for node in state['nodes'] if node['class_name'] in ['kitchencabinets', 'kitchencounterdrawer', 'kitchencounter']]
+                    else:
+                        containers = [[node['id'], node['class_name']] for node in state['nodes'] if node['class_name'] == 'coffetable']
+                    for edge in state['edges']:
+                        if edge['relation_type'] == 'INSIDE' and edge['to_id'] == int(elements[2]) and id2node[edge['from_id']]['class_name'] == elements[1]:
+                            container = random.choice(containers)
+                            predicate = '{}_{}_{}'.format('on' if container[1] == 'kitchencounter' else 'inside', edge['from_id'], container[0])
+                            goals[predicate] = 1
+            elif predicate in [opponent_predicate_1, opponent_predicate_2] and len(inhand_objects_opponent) == 0:
+                elements = predicate.split('_')
+                # print(elements)
+                if elements[0] == 'on':
+                    subgoal_type = 'put'
+                    obj = elements[1]
+                    surface = elements[2] # assuming it is a graph node id
+                    for node in state['nodes']:
+                        if node['class_name'] == obj or str(node['id']) == obj:
+                            tmp_predicate = 'on_{}_{}'.format(node['id'], surface) 
+                            if tmp_predicate not in satisfied[predicate]:
+                                tmp_subgoal = '{}_{}_{}'.format(subgoal_type, node['id'], surface)
+                                overlapped_subgoal_space.append(['{}_{}_{}'.format(subgoal_type, node['id'], surface), predicate, tmp_predicate])                        
+                elif elements[0] == 'inside':
+                    subgoal_type = 'putIn'
+                    obj = elements[1]
+                    surface = elements[2] # assuming it is a graph node id
+                    for node in state['nodes']:
+                        if node['class_name'] == obj or str(node['id']) == obj:
+                            tmp_predicate = 'inside_{}_{}'.format(node['id'], surface) 
+                            if tmp_predicate not in satisfied[predicate]:
+                                tmp_subgoal = '{}_{}_{}'.format(subgoal_type, node['id'], surface)
+                                overlapped_subgoal_space.append(['{}_{}_{}'.format(subgoal_type, node['id'], surface), predicate, tmp_predicate])
+                                    
+        if len(obsed_subgoal_space) > 0:
+            return obsed_subgoal_space
+        if len(subgoal_space) == 0:
+            # if agent_id == 2 and verbose == 1:
+            #     ipdb.set_trace()
+            if len(overlapped_subgoal_space) > 0:
+                return overlapped_subgoal_space
+            for predicate, count in unsatisfied.items():
+                if count == 1:
+                    elements = predicate.split('_')
+                    # print(elements)
+                    if elements[0] == 'turnOn':
+                        subgoal_type = 'turnOn'
+                        obj = elements[1]
+                        for node in state['nodes']:
+                            if node['class_name'] == obj or str(node['id']) == obj:
+                                # print(node)
+                                # if verbose:
+                                #     print(node)
+                                tmp_predicate = 'turnOn{}_{}'.format(node['id'], 1) 
+                                if tmp_predicate not in satisfied[predicate]:
+                                    subgoal_space.append(['{}_{}'.format(subgoal_type, node['id']), predicate, tmp_predicate])
+        if len(subgoal_space) == 0:
+            for predicate, count in unsatisfied.items():
+                if count == 1:
+                    elements = predicate.split('_')
+                    # print(elements)
+                    if elements[0] == 'holds' and int(elements[2]) == agent_id:
+                        subgoal_type = 'grab'
+                        obj = elements[1]
+                        for node in state['nodes']:
+                            if node['class_name'] == obj or str(node['id']) == obj:
+                                # print(node)
+                                # if verbose:
+                                #     print(node)
+                                tmp_predicate = 'holds_{}_{}'.format(node['id'], 1) 
+                                if tmp_predicate not in satisfied[predicate]:
+                                    subgoal_space.append(['{}_{}'.format(subgoal_type, node['id']), predicate, tmp_predicate])
+        if len(subgoal_space) == 0:
+            for predicate, count in unsatisfied.items():
+                if count == 1:
+                    elements = predicate.split('_')
+                    # print(elements)
+                    if elements[0] == 'sit' and int(elements[1]) == agent_id:
+                        subgoal_type = 'sit'
+                        obj = elements[2]
+                        for node in state['nodes']:
+                            if node['class_name'] == obj or str(node['id']) == obj:
+                                # print(node)
+                                # if verbose:
+                                #     print(node)
+                                tmp_predicate = 'sit_{}_{}'.format(1, node['id']) 
+                                if tmp_predicate not in satisfied[predicate]:
+                                    subgoal_space.append(['{}_{}'.format(subgoal_type, node['id']), predicate, tmp_predicate])
+
+        return subgoal_space
