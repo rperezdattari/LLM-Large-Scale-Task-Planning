@@ -265,6 +265,60 @@ class StateNode:
         self.use_llm = False
         self.expand_node = False
 
+    # def find_state_in_tree(self, target_obs):
+    #     """
+    #     Searches the entire tree for a state with the given observation.
+    #     Utilizes DFS to traverse through all state nodes in the tree.
+    #     """
+    #     # Check the current state node first
+    #     if self.ob == target_obs:
+    #         print("-----------------------same state before !!! -------------------------")
+    #         return True, self
+
+    #     # If not found, recursively search through the children of the state node
+    #     for action_node in self.children:
+    #         if action_node.children:  # Ensure the action node has a child state
+    #             found, state_node = action_node.children.find_state_in_tree(target_obs)
+    #             if found:
+    #                 print("-----------------------same state before !!! -------------------------")
+    #                 return True, state_node
+
+    #     # If the state was not found in any children, return False
+    #     return False, None
+    
+    def find_state_in_tree(self, target_obs, visited=None):
+        if visited is None:
+            visited = set()
+
+        # Mark the current node as visited
+        if self.id in visited:
+            return False, None
+        visited.add(self.id)
+
+        # Check if the current node matches the target observation
+        if self.ob == target_obs:
+            print("-----------------------same state before !!! -------------------------")
+            return True, self
+
+        # Recursively search in children nodes
+        for action_node in self.children:
+            if action_node.children:
+                # Ensure that the child node is not already visited
+                if action_node.children not in visited:
+                    found, state_node = action_node.children.find_state_in_tree(target_obs, visited)
+                    if found:
+                        # print("-----------------------same state before !!! -------------------------")
+                        return True, state_node
+
+        # If not found in any children, return False
+        return False, None
+
+
+
+
+
+
+
 
 class ActionNode:
     def __init__(self, action):
@@ -300,6 +354,8 @@ class MCTSAgent:
         self.exploration_constant = args.exploration_constant
         self.bonus_constant = args.bonus_constant
         self.max_depth = args.max_depth
+        # self.max_depth_rollout = 30
+        self.max_depth_rollout = 50
         self.simulation_per_act = args.simulation_per_act
         self.discount_factor = args.discount_factor
         self.visited_transitions = visited_transitions
@@ -323,6 +379,9 @@ class MCTSAgent:
         self.action_embedding = {}
         self.replay_file = replay_file
 
+        self.states_created_id = 1
+        self.states_id_history = []
+
     def search(self, valid_actions, done=False):
         '''
         Search the best action with probs
@@ -332,68 +391,31 @@ class MCTSAgent:
         obs = self.env.reset()
         self.root = self.build_state(obs, valid_actions, done)
         sim_steps = 0
-        # satisfied_task_goal = {key: [] for key in self.env.task_goal[0].keys()}  # save the whether the goal are satisfied, will be updated later
         for _ in tqdm(range(self.simulation_num)):
-            # # find_actions, find_costs = find_heuristic(agent_id, char_index, unsatisfied, env_graph, simulator, object_target)
-            # print("self.selected_objects_id: ", self.selected_objects_id)
-            # print("self.env.task_goal: ", self.env.task_goal)
-            # print("goal_spec: ", self.env.goal_spec)
-            # find_actions, find_costs = find_heuristic(0, 0, False, self.env.cur_state_graph, self.env.vh_pyenv, 'on_wineglass_231')
-            # print("find_actions: ", find_actions)
-            # put_actions, find_costs = put_heuristic(0, 0, False, self.env.cur_state_graph, self.env.vh_pyenv, 'put_298_231')
-            # print("grab_actions: ", put_actions)
-            # # get_subgoal_space(self, state, satisfied, unsatisfied, opponent_subgoal=None, verbose=0):
-            # # sub_goal_spaces = self.get_subgoal_space(self.env.cur_state_graph, { 'on_wineglass_231': 0}, { 'on_wineglass_231': 2})
-            # sub_goal_spaces = self.get_subgoal_space(self.env.cur_state_graph, satisfied_task_goal, self.env.task_goal[0])
-            # print("sub_goal_spaces: ", sub_goal_spaces)
-            # goals_expanded = 0
-            # actions_str = []
-            # for goal_predicate in sub_goal_spaces:
-            #     goal, predicate, aug_predicate = goal_predicate[0], goal_predicate[1], goal_predicate[2] # subgoal, goal predicate, the new satisfied predicate
-            #     heuristic = heuristic_dict[goal.split('_')[0]]
-            #     actions_heuristic, costs = heuristic(0, 0,  None, self.env.cur_state_graph, self.env.vh_pyenv, goal)
-            #     if actions_heuristic is None:
-            #         continue
-            #     cost = sum(costs)
-            #     # print(goal_predicate, cost)
-            #     # next_vh_state = vh_state
-            #     # actions_str = []
-            #     for action in actions_heuristic:
-            #         action_str = self.get_action_str(action)
-            #         actions_str.append(action_str)
-            #         # print([edge for edge in state['edges'] if edge['from_id'] == int(goal.split('_')[1])])
-            #         # print(goal_predicate, action_str)
-            #         # TODO: this could just be computed in the heuristics?
-            #         # next_vh_state = self.env.transition(next_vh_state, {0: action_str})
-            #         print("action_str: ", action_str)
-            #         obs, reward, done, history, valid_actions = self.env.step(action_str)
-            #         if done:
-            #             return actions_str, sim_steps
-
-            #         print("done: ",done)                
-            #     goals_expanded += 1
-
-            #     # next_satisfied = copy.deepcopy(satisfied)
-            #     # next_unsatisfied = copy.deepcopy(unsatisfied)
-            # #     if aug_predicate is not None:
-            # #         next_satisfied[predicate].append(aug_predicate)
-            # # next_unsatisfied[predicate] -= 1
-            # # ipdb.set_trace()
             self.env.reset()
             self.last_history = []
+            self.states_id_history = []
             #self.env.history = init_history.copy()
             R, root, history  = self.simulate(self.root, 0)
             sim_steps += 1
-            if self.done:  # if success, the action returned is the history
-                return history, sim_steps
+            # if self.done:  # if success, the action returned is the history
+            #     return self.env.history, sim_steps
             # self.root = root
         # select best action by Q-value
-        best_action_node_idx = self.greedy_action_node(self.root, 0, 0, if_print=True)
-        # select best action by Count
-        best_action_node = self.root.children[best_action_node_idx]
-        print("best action node: ", best_action_node)
-        self.root.best_action_node = best_action_node
-        return None, sim_steps #self.root.best_action_node.action
+        # best_action_node_idx = self.greedy_action_node(self.root, 0, 0, if_print=True)
+        # # select best action by Count
+        # best_action_node = self.root.children[best_action_node_idx]
+        # print("best action node: ", best_action_node)
+        # self.root.best_action_node = best_action_node
+
+        # ipdb.set_trace()
+        self.env.reset()
+        self.last_history = []
+        #self.env.history = init_history.copy()
+        self.exploration_constant = 0.0
+        R, root, history  = self.simulate(self.root, 0)  # the history returned here can be wrong
+        
+        return self.env.history, sim_steps #self.root.best_action_node.action
 
     @staticmethod
     def state_id(history: list):
@@ -432,7 +454,8 @@ class MCTSAgent:
         state.reward = reward
         state.prev_action = prev_action
         # state.history = history
-        # state.id = self.state_id(history)
+        state.id = self.states_created_id
+        self.states_created_id = self.states_created_id + 1
         state.valid_actions = valid_actions
 
         state.children_probs = np.ones((len(state.valid_actions),)) / len(state.valid_actions)
@@ -453,12 +476,15 @@ class MCTSAgent:
             check_number = check_number + 1
             print("check_wether_already_in_tree ")
             state_obs = state_node.ob
+            # print(state_obs)
             if state_obs == new_obs:
                 print("-----------------------same state before !!! -------------------------")
                 return True, state_node
             state_node = state_node.parent
             if check_number > 100:
                 return False, None
+            
+        
         return False, None
 
 
@@ -476,23 +502,17 @@ class MCTSAgent:
             print("done!")
             self.last_history = history
             self.done = True
-            return 0, state_node, self.last_history
+            # return 0, state_node, self.last_history
+            return reward, state_node, self.last_history
         print('len of self.last_history: ', len(self.last_history), 'len of history: ', len(history))
+        print("valid_actions: ", valid_actions)
         # print("history: ", history)
-        if len(history) > 100:
+        if len(history) > self.max_depth:
             return 0, state_node, self.last_history
         next_state_id = self.state_id(history)
-        # print("next_state_id ", next_state_id, " history: ", history)
-        print("next_state_id ", next_state_id)
-        print("depth: ", depth)
-        # if next_state_id == best_action_node.children_id:
-        print("best_action_node.children: ", best_action_node.children)
-        flag_same_state, same_state_previous= self.check_wether_already_in_tree(obs, state_node)
-        if flag_same_state:
-            best_action_node.children = same_state_previous
-            next_state_node = same_state_previous
-            rollout_next = False
-        elif best_action_node.children is not None: 
+        self.states_id_history.append(state_node.id)
+
+        if best_action_node.children is not None: 
             # [To do] check whether the state is in the current tree
             #next_state_node = best_action_node.children
             # next_state_node = self.build_state(obs, valid_actions, done, reward, prev_action=best_action_node.action)
@@ -506,10 +526,15 @@ class MCTSAgent:
             state_node.children[best_action_node_idx].children_id = next_state_node.id
             rollout_next = True
 
+        print("rollout_next: ", rollout_next)
+
+        if rollout_next and self.exploration_constant == 0.0:
+            return 0, state_node, self.last_history
+
         if rollout_next:
             rollout_r = []
             for _ in range(1):
-                random_r = reward + self.discount_factor * self.rollout(next_state_node, depth+1)
+                random_r = reward + self.discount_factor * self.rollout(next_state_node, 0, len(history))
                 rollout_r.append(random_r)
             R = sum(rollout_r)/len(rollout_r)
         else:
@@ -518,6 +543,9 @@ class MCTSAgent:
             R = reward + self.discount_factor * r
 
         # [To do]backprogration, also change N and Q for all the parents node
+        print("total reward: ", R, " reward ", reward, " len(history): ", len(history) )
+        # print("reward: ", R, " state_node.N: ", state_node.N, ' state id: ', state_node.id , " best_action_node.action:",best_action_node.action )
+        # print("best_action_node_idx: ", best_action_node_idx, "state_node.children[best_action_node_idx].Rs: ", state_node.children[best_action_node_idx].Rs, ' N: ',  state_node.children[best_action_node_idx].N)
         state_node.N += 1
         state_node.children[best_action_node_idx].N += 1
         state_node.children[best_action_node_idx].children = next_state_node
@@ -602,28 +630,34 @@ class MCTSAgent:
         # [To do] if multiple has same argmax, randomly choose one
         # output_action_index = np.argmax(best_children_prob)
         # return best_children[output_action_index]
-        print("best_children_prob: ", best_children_prob)
+        # print("best_children_prob: ", best_children_prob)
         max_prob_indices = np.flatnonzero(best_children_prob == best_children_prob.max())
         # Randomly choose one of the indices with the maximum value
         output_action_index = np.random.choice(max_prob_indices)
         # Use the randomly chosen index to select the corresponding action
         return best_children[output_action_index]
 
-    def rollout(self, state_node, depth):
-        if state_node.done or depth == self.max_depth or len(state_node.children) == 0:
+    def rollout(self, state_node, depth, depth_traj):
+        if state_node.done or depth == self.max_depth_rollout or depth_traj == self.max_depth or len(state_node.children) == 0:
             return 0
 
-        action_node = np.random.choice(state_node.children, 1)[0]
+        # action_node = np.random.choice(state_node.children, 1)[0]
 
+        # action = action_node.action
+        action_index = np.random.choice(range(len(state_node.children)), 1)[0]
+
+        action_node = state_node.children[action_index]
         action = action_node.action
 
-        print("possible action: ", len(state_node.children),  "rollout action: ", action)
+
+        # print("possible action: ", len(state_node.children),  "rollout action: ", action)
 
         obs, reward, done, history, valid_actions = self.env.step(action)
         self.last_history = history
 
-        if self.selected_objects_id is not None:  # this means filter objects is False
-            valid_actions = filter_valid_actions(valid_actions, self.selected_objects_id)
+        # if self.selected_objects_id is not None:  # this means filter objects is False
+        #     print("self.selected_objects_id: ", self.selected_objects_id)
+        #     valid_actions = filter_valid_actions(valid_actions, self.selected_objects_id)
 
         if done:
             print("Done!")
@@ -632,13 +666,23 @@ class MCTSAgent:
 
         if next_state_id == action_node.children_id:
             next_state_node = action_node.children
+        # flag_same_state, same_state_previous = self.root.find_state_in_tree(obs)
+        # if flag_same_state:
+            # next_state_node = same_state_previous
         else:
             next_state_node = self.build_state(obs, valid_actions, done, reward, prev_action=action)
-            # next_state_node.parent = state_node
-            # action_node.children = next_state_node
-            # action_node.children_id = next_state_node.id
+            next_state_node.parent = state_node
+            action_node.children = next_state_node
+            action_node.children_id = next_state_node.id
+        
+        r = reward + self.discount_factor * self.rollout(next_state_node, depth+1, depth_traj+1)
 
-        r = reward + self.discount_factor * self.rollout(next_state_node, depth+1)
+        state_node.N += 1
+        state_node.children[action_index].N += 1
+        state_node.children[action_index].children = next_state_node
+        state_node.children[action_index].Rs.append(r)
+        state_node.children[action_index].Q = np.sum(np.array(state_node.children[action_index].Rs) * utils.softmax(state_node.children[action_index].Rs, T=10))
+
         return r
     
     def get_action_str(self, action_tuple):

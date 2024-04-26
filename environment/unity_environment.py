@@ -5,6 +5,7 @@ import pdb
 import ipdb
 import numpy as np
 import json
+import copy
 from utils import add_beer
 
 with open('environment/info/object_info.json') as f:
@@ -14,7 +15,7 @@ with open('environment/info/object_info.json') as f:
 class UnityEnvironment(BaseUnityEnvironment):
     def __init__(self,
                  num_agents=2,
-                 max_episode_length=200,
+                 max_episode_length=300,
                  env_task_set=None,
                  observation_types=None,
                  agent_goals=None,
@@ -52,6 +53,8 @@ class UnityEnvironment(BaseUnityEnvironment):
         self.recording_options = recording_options
         self.full_graph = None
 
+        self.rewarded_counts = {}  # Initialize in your environment's constructor
+
     def get_graph(self):
         graph = super().get_graph()
         return graph
@@ -62,22 +65,58 @@ class UnityEnvironment(BaseUnityEnvironment):
         graph = add_beer(graph, id=1002)
         return graph
 
+    # def reward(self):
+    #     reward = 0.
+    #     done = True
+    #     #satisfied, unsatisfied = utils.check_progress(self.get_graph(), self.goal_spec[0])
+    #     satisfied, unsatisfied = utils.check_progress(self.get_graph(), self.goal_spec)
+    #     for key, value in satisfied.items():
+    #         #preds_needed, mandatory, reward_per_pred = self.goal_spec[0][key]
+    #         preds_needed, mandatory, reward_per_pred = self.goal_spec[key]
+    #         # How many predicates achieved
+    #         value_pred = min(len(value), preds_needed)
+    #         reward += value_pred * reward_per_pred
+    #         if mandatory and unsatisfied[key] > 0:
+    #             done = False
+
+    #     self.prev_reward = reward
+    #     return reward, done, {'satisfied_goals': satisfied}
+
     def reward(self):
-        reward = 0.
-        done = True
-        #satisfied, unsatisfied = utils.check_progress(self.get_graph(), self.goal_spec[0])
+        reward = 0.0
+        done = True  # Start by assuming the task is completed.
+
+        # Fetch progress towards the goal specification.
         satisfied, unsatisfied = utils.check_progress(self.get_graph(), self.goal_spec)
-        for key, value in satisfied.items():
-            #preds_needed, mandatory, reward_per_pred = self.goal_spec[0][key]
+        
+        # Iterate through each goal in the specification.
+        for key, values in satisfied.items():
             preds_needed, mandatory, reward_per_pred = self.goal_spec[key]
-            # How many predicates achieved
-            value_pred = min(len(value), preds_needed)
-            reward += value_pred * reward_per_pred
+
+            # Initialize the count for this predicate if not already tracked
+            if key not in self.rewarded_counts:
+                self.rewarded_counts[key] = 0
+
+            # Determine the number of new predicate achievements to reward
+            current_count = len(values)
+            already_rewarded = self.rewarded_counts[key]
+            rewardable = min(current_count, preds_needed) - already_rewarded
+            print("key: ", key, " already_rewarded: ", already_rewarded, " rewardable: ", rewardable)
+
+            if rewardable > 0:
+                reward += rewardable * reward_per_pred
+                # Update the count of rewarded instances for this predicate
+                self.rewarded_counts[key] += rewardable
+
+            # If there are mandatory predicates that are unsatisfied, the task is not done.
             if mandatory and unsatisfied[key] > 0:
                 done = False
 
-        self.prev_reward = reward
+        self.prev_reward = reward  # Store the current reward.
+        print("reward: ", reward)
+        # Return the reward, the done status, and a dictionary detailing the satisfied goals.
         return reward, done, {'satisfied_goals': satisfied}
+
 
     def get_goal(self, task_spec, agent_goal):
         if agent_goal == 'full':
@@ -105,7 +144,7 @@ class UnityEnvironment(BaseUnityEnvironment):
         else:
             raise NotImplementedError
 
-    def reset(self, environment_graph=None, env_id=None, add_character=True, task_id=None, task_goal=None):
+    def reset(self, environment_graph=None, env_id=None, add_character=True, init_graph=None, task_id=None, task_goal=None):
 
         # Make sure that characters are out of graph, and ids are ok
         # ipdb.set_trace()
@@ -114,9 +153,11 @@ class UnityEnvironment(BaseUnityEnvironment):
         #     task_id = self.rnd.choice(list(range(len(self.env_task_set))))
         # env_task = self.env_task_set[task_id]
 
-        # self.task_id = env_task['task_id']
-        # self.init_graph = copy.deepcopy(env_task['init_graph'])
-        # self.init_rooms = env_task['init_rooms']
+        self.rewarded_counts = {}  # Initialize in your environment's constructor
+
+        self.task_id = task_id
+        self.init_graph = copy.deepcopy(init_graph)
+        self.init_rooms = ['bedroom', 'kitchen']
         # if task_goal is None:
         #     self.task_goal = env_task['task_goal']
         # else:

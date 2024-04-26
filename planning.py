@@ -14,18 +14,23 @@ from experiments_info.experiments_parameters import experiments
 
 from test_mcts_agents import MCTS_agent
 
+
+
+
+import ipdb
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', default='full', type=str)
 
     # MCTC
-    parser.add_argument('--exploration_constant', default=24, type=int)
+    parser.add_argument('--exploration_constant', default=0.5, type=int)
     parser.add_argument('--bonus_constant', default=1, type=int)
-    parser.add_argument('--max_depth', default=50, type=int)
+    parser.add_argument('--max_depth', default=199, type=int)
     parser.add_argument('--round', default=0, type=int)
     parser.add_argument('--simulation_per_act', default=2, type=int)
-    parser.add_argument('--discount_factor', default=0.95, type=float)
-    parser.add_argument('--simulation_num', default=800, type=int)
+    parser.add_argument('--discount_factor', default=0.99, type=float)
+    parser.add_argument('--simulation_num', default=600, type=int)
     parser.add_argument('--uct_type', default='PUCT', type=str)
     return parser.parse_args()
 
@@ -73,6 +78,15 @@ if __name__ == "__main__":
             'no_graphics': False
         }
         ####
+        # filename = 'gen_data/dataset/test_env_set_help.pik'
+        
+        filename = 'gen_data/dataset/train_env_set_help.pik'
+        with open(filename, 'rb') as file:
+            # Load the object from the file
+            dataset_list = pickle.load(file)
+
+        # 'env_id', 'init_graph'
+        
 
         results = []
         succ, total = 0, 0
@@ -80,12 +94,19 @@ if __name__ == "__main__":
         # Iterate through every evaluation task
         for task in tasks:
             # Get task goal
-            task_goal = task['goal'][0]
-            env_id = task['id']
+            # task_goal = task['goal'][0]
+            # env_id = task['id']
+
+            test_data_id = 98
+            env_id = dataset_list[test_data_id]['env_id']
+            task_goal = dataset_list[test_data_id]['task_goal'][0]
+            graph = dataset_list[test_data_id]['init_graph']
+            # print("graph: ", graph.)
+            print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
 
             # Init virtualhome env
             vhenv = UnityEnvironment(num_agents=1,
-                                     max_episode_length=100,
+                                     max_episode_length=300,
                                      port_id=2,
                                      env_task_set=None,  # env_task_set,#[env_task_set[0]],
                                      observation_types=['full'],
@@ -95,11 +116,15 @@ if __name__ == "__main__":
                                      base_port=8080,
                                      seed=1)
             # Restart env
-            vhenv.reset(task_goal=task_goal, env_id=env_id)
+            
+            # vhenv.reset(task_goal=task_goal, init_graph=graph,env_id=env_id)
+            # vhenv.reset(task_goal=task_goal,env_id=env_id)
 
             # Add beers and restart again TODO: this should not be done, or at least not here
-            graph = vhenv.add_beers()
-            obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)
+            # graph = vhenv.add_beers()
+
+            obs = vhenv.reset(task_goal=task_goal, init_graph=graph, env_id=env_id, add_character=True)
+            # obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)
 
             # Get valid actions
             valid_actions = vhenv.get_valid_action(obs)
@@ -148,7 +173,7 @@ if __name__ == "__main__":
             elif policy_type == 'mcts_2': # not done yet
                 args_common = dict(recursive=False,
                          max_episode_length=5,
-                         num_simulation=100,
+                         num_simulation=200,
                          max_rollout_steps=5,
                          c_init=0.1,
                          c_base=1000000,
@@ -195,6 +220,7 @@ if __name__ == "__main__":
 
                 # Do environment step
                 obs, reward, done, info, success = vhenv.step({0: action})
+                print("done: ", done)
 
                 # Get valid actions and filtered actions (if filter activated)
                 valid_actions = vhenv.get_valid_action(obs)
@@ -229,6 +255,7 @@ if __name__ == "__main__":
                     break
 
             total += 1
+            # ipdb.set_trace()
             episode_info.append({'successful': done})
             results.append(episode_info)
 

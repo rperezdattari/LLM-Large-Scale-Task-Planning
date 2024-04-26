@@ -29,7 +29,7 @@ parser.add_argument('--task', type=str, default='setup_table', help='Task name')
 parser.add_argument('--apt_str', type=str, default='0,1,2,4,5', help='The apartments where we will generate the data')
 parser.add_argument('--port', type=str, default='8082', help='Task name')
 parser.add_argument('--display', type=int, default=0, help='Task name')
-parser.add_argument('--mode', type=str, default='full', choices=['simple', 'full'], help='Task name')
+parser.add_argument('--mode', type=str, default='simple', choices=['simple', 'full'], help='Task name')
 parser.add_argument('--use-editor', action='store_true', default=True, help='Use unity editor')
 parser.add_argument('--exec_file', type=str,
                     default='./home/zhaoting/miniconda3/envs/llm_filter_planning/lib/python3.8/site-packages/virtualhome/simulation/unity_simulator/linux_exec/linux_exec.v2.3.0.x86_64',

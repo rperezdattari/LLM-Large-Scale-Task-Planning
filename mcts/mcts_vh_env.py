@@ -21,6 +21,8 @@ class MCTSVHEnv:
         self.cur_state = self.vh_pyenv.get_vh_state(graph)
         self.init_state = copy.deepcopy(self.cur_state)
         self.init_graph = self.init_state.to_dict()
+
+        self.rewarded_counts = {}  # Initialize in your environment's constructor
         #self.belief = None
 
     def filtering_graph(self, graph):
@@ -384,6 +386,8 @@ class MCTSVHEnv:
 
         self.history = []
         self.init_history = []
+
+        self.rewarded_counts = {}  # Initialize in your environment's constructor
         return obs
 
     def copy_env(self):
@@ -427,22 +431,61 @@ class MCTSVHEnv:
     #     self.init_state = copy.deepcopy(self.cur_state)
     #     return reward, done, self.history
 
+    # def reward(self):
+    #     reward = 0.
+    #     done = True
+    #     #satisfied, unsatisfied = utils.check_progress(self.get_graph(), self.goal_spec[0])
+    #     satisfied, unsatisfied = self.check_progress(self.cur_state_graph, self.goal_spec)
+    #     for key, value in satisfied.items():
+    #         #preds_needed, mandatory, reward_per_pred = self.goal_spec[0][key]
+    #         preds_needed, mandatory, reward_per_pred = self.goal_spec[key]
+    #         # How many predicates achieved
+    #         value_pred = min(len(value), preds_needed)
+    #         reward += value_pred * reward_per_pred
+    #         if mandatory and unsatisfied[key] > 0:
+    #             done = False
+
+    #     self.prev_reward = reward
+    #     return reward, done, {'satisfied_goals': satisfied}
+
     def reward(self):
-        reward = 0.
-        done = True
-        #satisfied, unsatisfied = utils.check_progress(self.get_graph(), self.goal_spec[0])
+        reward = 0.0
+        done = True  # Start by assuming the task is completed.
+
+        # Fetch progress towards the goal specification.
         satisfied, unsatisfied = self.check_progress(self.cur_state_graph, self.goal_spec)
-        for key, value in satisfied.items():
-            #preds_needed, mandatory, reward_per_pred = self.goal_spec[0][key]
+        
+        # Iterate through each goal in the specification.
+        for key, values in satisfied.items():
             preds_needed, mandatory, reward_per_pred = self.goal_spec[key]
-            # How many predicates achieved
-            value_pred = min(len(value), preds_needed)
-            reward += value_pred * reward_per_pred
+
+            # Initialize the count for this predicate if not already tracked
+            if key not in self.rewarded_counts:
+                self.rewarded_counts[key] = 0
+
+            # Determine the number of new predicate achievements to reward
+            current_count = len(values)
+            already_rewarded = self.rewarded_counts[key]
+            rewardable = min(current_count, preds_needed) - already_rewarded
+            # print("key: ", key, " already_rewarded: ", already_rewarded, " rewardable: ", rewardable)
+
+            if rewardable > 0:
+                reward += rewardable * reward_per_pred
+                # Update the count of rewarded instances for this predicate
+                self.rewarded_counts[key] += rewardable
+            # if rewardable < 0:
+            #     reward += rewardable * reward_per_pred
+            #     self.rewarded_counts[key] = 0
+
+            # If there are mandatory predicates that are unsatisfied, the task is not done.
             if mandatory and unsatisfied[key] > 0:
                 done = False
 
-        self.prev_reward = reward
+        self.prev_reward = reward  # Store the current reward.
+        # print("reward: ", reward)
+        # Return the reward, the done status, and a dictionary detailing the satisfied goals.
         return reward, done, {'satisfied_goals': satisfied}
+
 
     def step(self, action):
         #obs = self.vh_pyenv._mask_state(self.cur_state_graph, 0)
