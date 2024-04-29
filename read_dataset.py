@@ -1,7 +1,7 @@
 import pickle
 import ipdb
-
-
+import copy
+import random
 
 from environment.unity_environment import UnityEnvironment
 from environment.utils_environment import get_goal_language, filter_valid_actions
@@ -22,6 +22,72 @@ def get_goal(task_spec, agent_goal = 'full'):
         # res_dict.update(predicates_grab)
         # print(res_dict)
         return res_dict
+    
+# check whethter the init-graph includes some sub-task that has already been satisfied
+def is_task_completed(satisfied):
+    return not all(value == [] for value in satisfied.values())
+
+
+# [TO DO]
+# NOT VERY easy to do it for the general case
+# so, for single num_subtasks, only take one
+def generate_subset_tasks(original_item, num_subtasks):
+    new_item = copy.deepcopy(original_item)  # Deep copy to avoid modifying the original
+
+    # Adjust the task_goal to contain only a selected number of subtasks
+    if 'task_goal' in new_item:
+        # Filter out sub-tasks with zero value, as these are not required
+        active_tasks = {key: value for key, value in new_item['task_goal'][0].items() if value != 0}
+
+        # split active_tasks such as {'on_plate_232': 2} to {'on_plate_232': 1, {'on_plate_232': 1} } 
+        active_tasks = extract_subtasks(active_tasks, num_subtasks)
+        
+        # # If active_tasks is smaller than the requested subtasks, add necessary tasks with zero values
+        # necessary_zero_tasks = {key: value for key, value in new_item['task_goal'][0].items() if value == 0}
+        
+        # # Choose from active tasks first
+        # task_keys = list(active_tasks.keys())
+        # if len(task_keys) >= num_subtasks:
+        #     selected_keys = random.sample(task_keys, num_subtasks)
+        # else:
+        #     selected_keys = task_keys
+        #     # If not enough active tasks, add from the zero-value tasks
+        #     additional_keys_needed = num_subtasks - len(selected_keys)
+        #     if additional_keys_needed > 0 and necessary_zero_tasks:
+        #         selected_keys += random.sample(list(necessary_zero_tasks.keys()), additional_keys_needed)
+
+        # Construct the new task_goal with the selected keys
+        # new_item['task_goal'][0] = {key: new_item['task_goal'][0][key] for key in selected_keys}
+        if active_tasks is None:
+            return None
+        new_item['task_goal'][0] = active_tasks
+
+    return new_item
+
+def extract_subtasks(original_tasks, num_subtasks):
+    # Flatten the task dictionary into a list of tasks
+    task_list = []
+    for task, count in original_tasks.items():
+        task_list.extend([task] * count)
+
+    # Ensure not to sample more than the population
+    if num_subtasks > len(task_list):
+        # Option 1: Return the whole list as a dictionary if more subtasks are requested than available
+        return None
+    
+    # Randomly select the desired number of subtasks
+    selected_tasks = random.sample(task_list, num_subtasks)
+
+    # Create a new dictionary to store the extracted subtasks with their counts
+    new_task_dict = {}
+    for task in selected_tasks:
+        if task in new_task_dict:
+            new_task_dict[task] += 1
+        else:
+            new_task_dict[task] = 1
+
+    return new_task_dict
+
 
 # Replace 'yourfile.pik' with the actual file path
 filename = 'gen_data/dataset/train_env_set_help.pik'
@@ -40,43 +106,39 @@ with open(filename, 'rb') as file:
 # your_object is now the deserialized object that was stored in the file
 print('len of the data set: ', len(dataset_list))
 
+number_subtask = 6
+new_dataset = []
 for i in range(0, len(dataset_list)):
-    print(i, " task name: ", dataset_list[i]['task_name'],  " task_goal: ", dataset_list[i]['task_goal'][0], " level: ", dataset_list[i]['level'])
+   
     graph = dataset_list[i]['init_graph'] 
-    print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
+    # print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
 
     test_data_id = i
     env_id = dataset_list[test_data_id]['env_id']
     task_goal = dataset_list[test_data_id]['task_goal'][0]
     graph = dataset_list[test_data_id]['init_graph']
     # print("graph: ", graph.)
-    print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
-
-    # # Init virtualhome env
-    # vhenv = UnityEnvironment(num_agents=1,
-    #                             max_episode_length=300,
-    #                             port_id=2,
-    #                             env_task_set=None,  # env_task_set,#[env_task_set[0]],
-    #                             observation_types=['full'],
-    #                             use_editor=True,
-    #                             task_goal=[task_goal],
-    #                             executable_args=executable_args,
-    #                             base_port=8080,
-    #                             seed=1)
-    # # Restart env
-    
-    # # vhenv.reset(task_goal=task_goal, init_graph=graph,env_id=env_id)
-    # # vhenv.reset(task_goal=task_goal,env_id=env_id)
-
-    # # Add beers and restart again TODO: this should not be done, or at least not here
-    # # graph = vhenv.add_beers()
-
-    # obs = vhenv.reset(task_goal=task_goal, init_graph=graph, env_id=env_id, add_character=True)
+    # print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
 
     task_goal_env = get_goal(task_goal)
     satisfied, unsatisfied  = utils.check_progress(graph, task_goal_env)
-    print("satisfied: ", satisfied)
-    print("unsatisfied: ", unsatisfied)
+    if is_task_completed(satisfied):
+        print("--------------------------------------------------------------------------")
+        print("satisfied: ", satisfied, " is_task_completed: ", is_task_completed(satisfied))
+        print("unsatisfied: ", unsatisfied)
+
+        print(i, " task name: ", dataset_list[i]['task_name'],  " task_goal: ", dataset_list[i]['task_goal'][0], " level: ", dataset_list[i]['level'])
+    else:
+        new_item = generate_subset_tasks(dataset_list[i], number_subtask)
+        if new_item is not None:
+            new_dataset.append(new_item)
+            print(i, "new_item task name: ", new_item['task_name'],  " task_goal: ", new_item['task_goal'], " level: ", new_item['level'])
+        else:
+            print(i," None")
+    print(i, " task name: ", dataset_list[i]['task_name'],  " task_goal: ", dataset_list[i]['task_goal'][0], " level: ", dataset_list[i]['level'])
+
+with open(f'gen_data/dataset/new_train_set_{number_subtask}_subtasks.pik', 'wb') as new_file:
+    pickle.dump(new_dataset, new_file)
 
 
 # dataset decomposition 
