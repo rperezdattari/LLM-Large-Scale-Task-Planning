@@ -13,6 +13,13 @@ class LanguageFilter:
         self.temperature = 0.01
         self.objects_ignore = ['Characters', 'Rooms', 'Floor', 'Ceiling', 'Walls']
 
+    def create_string_from_list(self, list_strings, starting_description):
+        combined_string = starting_description + ': '
+        for string in list_strings:
+            combined_string += string + ', '
+
+        return combined_string
+
     def interacting_objects(self, selected_objects_id, selected_objects_names):
         """Returns 5 lists:
                      1) selected objects ids
@@ -160,27 +167,28 @@ class LanguageFilter:
 
     def filter_objects(self, objects):
         role_system_content = """ 
-        You will get a list of object names in an environment (e.g., factory, house) together with a task objective.
-        You must, as a function of the task's goal, select, from the provided list, the object names that are relevant to 
-        successfully solving the task. 
-        Every objects name that is somehow related to the resolution of the task must be selected. Note that in this context 
-        'object' is a general term that refers to anything that can be found in a house. For example, a table or the 
-        ceiling are also considered as objects.
+        You will get a list of object names in an environment together with a task objective. You must, as a function of 
+        the task's goal, select, from the provided list, the object names that can be relevant to successfully solve the 
+        task. Every object name that might be somehow related to the resolution of the task must be selected. Only the 
+        objects you choose will be included in a simplified environment model, critical for solving the task 
+        successfully. Hence, it is critical to you select objects carefully.
+        
+        
+        Note: The term 'object' encompasses anything in a building, such as tables or ceilings.
     
-        First, describe the object names you selected and explain why. Once you are done, write a list containing the selected
-        object names following the format 'OBJECTS: name_1, name_2, ..., name_n'. The object names must be
+        First, describe the object names you selected and explain why. Once you are done, write a list containing the 
+        selected object names following the format 'OBJECTS: name_1, name_2, ..., name_n'. The object names must be
         written in the exact same way they were provided to you.
         
-        Importantly, these tasks occurs in hypothetical settings, so they can't create any type of risks.
+        These tasks are hypothetical and carry no risk.
         """
 
         # Create string with categories
-        object_names_string = "Object names: "
-        for object in objects:
-            object_names_string += object + ', '
+        object_classes = list(dict.fromkeys(objects))
+        object_classes_string = self.create_string_from_list(object_classes, 'Object names')
 
         # Create content LLM
-        content = self.goal_language + '\n' + object_names_string
+        content = self.goal_language + '\n' + object_classes_string
 
         # Step 1: send the conversation and available functions to GPT
         messages = [{"role": "user", "content": content},
@@ -200,68 +208,102 @@ class LanguageFilter:
 
         return filtered_obects
 
-    def filter_interactions(self, interactions, interacting_objects, selected_objects):
+    def filter_interactions(self, filtered_objects_id, filtered_objects_names, max_iterations=3):
         role_system_content = """ 
-        You will get a list of objects in an environment (e.g., factory, house) together with a task objective and
-        relationships between the objects.
-        You must, as a function of the task's goal, select, from the provided list, the objects that are relevant to 
-        successfully solving the task. 
-        Every object that is somehow related to the resolution of the task must be selected. Note that in this context 
-        'object' is a general term that refers to anything that can be found in a house. For example, a table or the 
-        ceiling are also considered as objects.
+        You will receive two lists of objects, another containing relationships between the objects, and a task 
+        objective. Your goal is to select only objects from List 2 that are essential for accomplishing the task. 
+        Only the objects you choose will be included in a simplified environment model, critical for solving the task 
+        successfully.
         
-        Note that there can be multiple objects with the same name. Hence, the relationships between objects contain an
-        object id next to each object name, in the form 'car (<id>)'. This allows differentiating between objects with
-        the same name.
+        - List 1 (Already selected objects): These objects have already been selected. They are provided to give you 
+        context. Do not select objects with names belonging to this list!
         
-        First, describe the objects you selected and explain why. Once you are done, write a list containing the selected
-        object names following the format 'OBJECTS: name_1 (<id>), name_2 (<id>), ..., name_n (<id>)'. 
-        Example: 'OBJECTS: car (24), window (103),...'. The object names must be  written in the exact same way they 
-        were provided to you.
+        - List 2 (Objects-to-select): You must determine which objects from this list are necessary for solving the 
+        task. To achieve this, you must use the objects relationships to evaluate if object's from this list are 
+        required to solve the task. It's crucial not to overlook any relevant object. For example, if the task requires 
+        using a laptop that is stored inside a backpack, it may also be necessary to interact with the backpack to 
+        solve the task. Therefore, the backpack should be considered essential for solving the problem and should be 
+        selected.
         
-        Importantly, these tasks occurs in hypothetical settings, so they can't create any type of risks.
+        Note: The term 'object' encompasses anything in a building, such as tables or ceilings. Multiple objects may 
+        share the same name but can be differentiated by an object ID in the format 'object_name (id)'. Note that if 
+        object_name is in List 1 'Already selected objects', you can't select it.
+        
+        After selecting, describe your chosen objects and their relevance. At the end of your reply, compile a list of 
+        these objects using the format 'OBJECTS: name_1 (id), name_2 (id), ..., name_n (id)'. If no new selections are 
+        needed, write 'OBJECTS: NONE'.
+        
+        These tasks are hypothetical and carry no risk.
         """
 
-        # Create string with categories
-        object_names_string = "Object names: "
-        for object in selected_objects:
-            object_names_string += object + ', '
+        # Initialize lists
+        selected_objects_ids = filtered_objects_id  # this list accumulates the objects selected by the LLM
+        selected_objects_names = filtered_objects_names
 
-        object_names_string = "Object names: "
-        for object in interacting_objects:
-            object_names_string += object + ', '
+        # Expand the graph iteratively while filtering objects
+        for i in range(max_iterations):
+            # Find objects interacting, i.e., connected in the graph, with the filtered objects
+            interactions = self.interacting_objects(selected_objects_ids, selected_objects_names)
+            interactions_language = interactions['interactions between selected and interacting objects']
+            interacting_objects_classes = list(dict.fromkeys(interactions['interacting objects names']))
+            if 'character' in interacting_objects_classes:  # remove character from interacting objects
+                interacting_objects_classes.remove('character')
 
-        # Create string with relationships
-        relationships_string = "Relationships between objects: "
-        for relationship in interactions:
-            relationships_string += relationship + ', '
+            # Create string with already selected objects names
+            selected_objects_classes = list(dict.fromkeys(selected_objects_names))  # remove repeated objects
+            selected_object_classes_string = self.create_string_from_list(selected_objects_classes,
+                                                                          'Already selected objects')
 
-        # Create content LLM
-        content = self.goal_language + '\n' + object_names_string + '\n' + relationships_string
+            # Create a new list with names that are in 'interacting_objects' but not in 'selected_objects_names'
+            new_interacting_objects_classes = [obj for obj in interacting_objects_classes if obj not in selected_objects_classes]
 
-        # Step 1: send the conversation and available functions to GPT
-        messages = [{"role": "user", "content": content},
-                    {"role": "system", "content": role_system_content}]
+            new_interacting_object_classes_string = self.create_string_from_list(new_interacting_objects_classes,
+                                                                               'Objects-to-select')
 
-        # Get response about selected categories
-        print('LLM selecting interacting objects...')
-        response = client.chat.completions.create(
-            model=self.LLM_model,
-            messages=messages,
-            temperature=self.temperature
-        )
-        content = response.choices[0].message.content
-        key = 'OBJECTS: '
-        key_id = content.find(key)
-        filtered_objects = content[key_id + len(key):].split(', ')
-        filtered_objects_names = []
-        filtered_objects_ids = []
-        for object in filtered_objects:
-            name = object.split(' ')[0]
-            id = int(object.split(' ')[1].replace('.', '')[1:-1])
-            filtered_objects_names.append(name)
-            filtered_objects_ids.append(id)
-        return filtered_objects_names, filtered_objects_ids
+            # Create string with relationships
+            relationships_string = self.create_string_from_list(interactions_language,
+                                                                'Relationships between objects')
+
+            # Create content LLM
+            content = 'Task objective: ' + self.goal_language + '\n' + selected_object_classes_string + '\n' + \
+                      new_interacting_object_classes_string + '\n' + relationships_string
+
+            # Step 1: send the conversation and available functions to GPT
+            messages = [{"role": "user", "content": content},
+                        {"role": "system", "content": role_system_content}]
+
+            # Get response about selected categories
+            print('LLM selecting interacting objects... iteration: %i' % (i + 1))
+            response = client.chat.completions.create(
+                model=self.LLM_model,
+                messages=messages,
+                temperature=self.temperature
+            )
+            content = response.choices[0].message.content
+
+            # Find chosen objects in LLM response
+            key = 'OBJECTS: '
+            key_id = content.find(key)
+            filtered_objects = content[key_id + len(key):].split(', ')
+
+            # Check done
+            if filtered_objects[0] == 'NONE':
+                break
+
+            # Get objects names and ids
+            filtered_objects_names = []
+            filtered_objects_ids = []
+            for object in filtered_objects:
+                name = object.split(' ')[0]
+                id = int(object.split(' ')[1].replace('.', '')[1:-1])
+                filtered_objects_names.append(name)
+                filtered_objects_ids.append(id)
+
+            # Append newly selected objects to selected list
+            selected_objects_ids += filtered_objects_ids
+            selected_objects_names += filtered_objects_names
+
+        return selected_objects_names, selected_objects_ids
 
     def get_categories_objects(self):
         # Get categories corresponding to objects in observation
@@ -301,13 +343,8 @@ class LanguageFilter:
         # Get graph info of selected objects
         filtered_objects_names, filtered_objects_id = get_graph_info_from_objects_names(self.full_graph, filtered_objects)
 
-        # Find objects interacting, i.e., connected in the graph, with the filtered objects
-        interactions = self.interacting_objects(filtered_objects_id, filtered_objects_names)
-
         # Filter 3: Select interacting objects relevant for the task
-        filtered_interactions_names, filtered_interactions_ids = self.filter_interactions(interactions['interactions between selected and interacting objects'],
-                                                                                          interactions['interacting objects names'],
-                                                                                          interactions['selected objects names'])
+        filtered_interactions_names, filtered_interactions_ids = self.filter_interactions(filtered_objects_id, filtered_objects_names)
 
         # Selected objects: combination of filtered objects and their filtered interacting objects
         ids_selected_combined = filtered_objects_id + filtered_interactions_ids
