@@ -515,8 +515,8 @@ class UnityEnvironment(BaseUnityEnvironment):
                 if len(agent_obj_hold_edge) == 0:
                     continue
                 else:
-                    if len(agent_obj_hold_edge) != 1:
-                        continue
+                    # if len(agent_obj_hold_edge) != 1:
+                    #     continue
 
                     holding_obj_name = node_id_name_dict[agent_obj_hold_edge[0]['to_id']]
                     ignore_tar = [tem[1] for tem in ignore_objs_tars if tem[0] == holding_obj_name]
