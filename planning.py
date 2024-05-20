@@ -8,7 +8,8 @@ import argparse
 import pickle
 import json
 from mcts.mcts import MCTSAgent
-from experiments_info.tasks import tasks
+# from experiments_info.tasks import tasks
+from experiments_info.tasks_dataset import tasks
 import os
 from experiments_info.experiments_parameters import experiments
 
@@ -80,29 +81,41 @@ if __name__ == "__main__":
         ####
         # filename = 'gen_data/dataset/test_env_set_help.pik'
         
-        filename = 'gen_data/dataset/train_env_set_help.pik'
+        filename = 'gen_data/dataset/new_train_set_2_subtasks.pik'
         with open(filename, 'rb') as file:
             # Load the object from the file
             dataset_list = pickle.load(file)
 
         # 'env_id', 'init_graph'
         
+        for env in dataset_list:
+            g = env['init_graph']
+            id2node = {node['id']: node['class_name'] for node in g['nodes']}
+            cloth_ids = [node['id'] for node in g['nodes'] if node['class_name'] in ["clothespile"]]
+            g['nodes'] = [node for node in g['nodes'] if node['id'] not in cloth_ids]
+            g['edges'] = [edge for edge in g['edges'] if edge['from_id'] not in cloth_ids and edge['to_id'] not in cloth_ids]
 
         results = []
         succ, total = 0, 0
 
         # Iterate through every evaluation task
         for task in tasks:
+        # new_train_set_2_subtasks: 2 is not able to be used because the 'holds' action is not considered in parse_language_from_goal_script
+        # for test_data_id in range(3, 13):
+        # for test_data_id in range(44, 45):
             # Get task goal
-            # task_goal = task['goal'][0]
-            # env_id = task['id']
+            task_goal = task['goal'][0]
+            env_id = task['id']
 
-            test_data_id = 98
-            env_id = dataset_list[test_data_id]['env_id']
-            task_goal = dataset_list[test_data_id]['task_goal'][0]
-            graph = dataset_list[test_data_id]['init_graph']
+            # env_id = dataset_list[test_data_id]['env_id']
+            # task_goal = dataset_list[test_data_id]['task_goal'][0]
+            # # graph = dataset_list[test_data_id]['init_graph']
+            # graph = dataset_list[test_data_id]['init_graph']
+            from utils import find_nodes
+            # print("find nodes of initial graph apple: ", find_nodes(graph,class_name= 'dishwasher'))
+            # print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
             # print("graph: ", graph.)
-            print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
+            # print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
 
             # Init virtualhome env
             vhenv = UnityEnvironment(num_agents=1,
@@ -118,25 +131,50 @@ if __name__ == "__main__":
             # Restart env
             
             # vhenv.reset(task_goal=task_goal, init_graph=graph,env_id=env_id)
-            # vhenv.reset(task_goal=task_goal,env_id=env_id)
+            vhenv.reset(task_goal=task_goal,env_id=env_id)
 
             # Add beers and restart again TODO: this should not be done, or at least not here
-            # graph = vhenv.add_beers()
+            graph = vhenv.add_beers()
 
-            obs = vhenv.reset(task_goal=task_goal, init_graph=graph, env_id=env_id, add_character=True)
-            # obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)
+            # obs = vhenv.reset(task_goal=task_goal, init_graph=graph, env_id=env_id, add_character=True)
+
+            # to do, needs to find the map from the task in the dataset to the task that is consistent with the obs
+            # 1. target (such as dishwasher) has different id
+            # 2. missing objects, try to see whether we can add the missing objects into the environment
+
+            interested_item_list = ['fridge', 'tv', 'apple', 'chips', 'cupcake', 'pudding', 'whippedcream', 'pie', 'candybar', 'crackers', 'breadslice', 'bananas', 'lime', 'peach', 'plum',
+                                    'cereal', 'juice', 'milk', 'carrot', 'salad', 'mincedmeat', 'bellpepper', 'poundcake', 'chocolatesyrup', 'creamybuns', 'salmon', 'book', 'bookshelf']
+            interested_item_list_clean_kicten = ['kitchencounter', 'dishwasher', "coffeetable", 'kitchentable', 'fridge', 'mug', 'plate', 'dishbowl', 'wineglass', 'condimentbottle', 'fryingpan', 'cutleryknife', 'cutleryfork']
+            for item in interested_item_list:
+                print(item, " find nodes of obs: ", find_nodes(graph,class_name= item))
+            # print("obs[0] nodes: ", len(obs[0]['nodes']), len(obs[0]['edges']))
+            # print("obs: ", obs)
+            obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)
 
             # Get valid actions
             valid_actions = vhenv.get_valid_action(obs)
 
             # Get goal language
             goal_language = get_goal_language(task_goal, graph)
-            print('Goal:', goal_language)
+            print('Goal:', goal_language)   
+
+            # for subgoal, subgoal_count in task_goal.items():
+            #     print("subgoal: ", subgoal)
+            #     print("subgoal_count: ", subgoal_count)
+            #     goal_script_split = subgoal.split('_')
+            #     rel = goal_script_split[0]
+            #     obj = goal_script_split[1]
+            #     tar = goal_script_split[2]
+            #     print("obj: ", obj, " find nodes of obs: ", len(find_nodes(obs[0],class_name= obj)))
+            #     print("obj: ", obj, " find nodes of obs: ", find_nodes(obs[0],class_name= obj))
+
 
             # Get filtered objects and filtered valid actions actions from graph and goal
             if filter_objects:
                 selected_objects_id, selected_objects_names = get_filtered_objects(obs, goal_language, LLM_model)
                 filtered_valid_actions = filter_valid_actions(valid_actions, selected_objects_id)
+                print("selected_objects_names: ", selected_objects_names)
+                print("filtered_valid_actions: ", filtered_valid_actions)
             else:
                 selected_objects_id = []
                 filtered_valid_actions = []

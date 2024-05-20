@@ -1,7 +1,7 @@
 from openai import OpenAI
 from environment.info.categories import categories, max_depth
 from utils import get_graph_info_from_objects_names, remove_duplicates_and_corresponding_elements
-
+import ipdb
 client = OpenAI()  # loads api key from environment variable
 
 
@@ -332,20 +332,25 @@ class LanguageFilter:
 
     def filter_graph(self):
         # Get categories objects
+        # ipdb.set_trace()
         objects_names_categories = self.get_categories_objects()
-
+        # print("objects_names_categories: ", objects_names_categories)
+        from utils import find_nodes
+        print("-------------------------------------------------------")
+        print("find nodes: ", find_nodes(self.full_graph[0],class_name= 'apple'))
+        # ipdb.set_trace()
         # Filter 1: Get initial subset of objects via categories
         selected_objects = self.filter_categories(objects_names_categories)
-
+        # ipdb.set_trace()
         # Filter 2: Select objects relevant to task
         filtered_objects = self.filter_objects(selected_objects)
-
+        # ipdb.set_trace()
         # Get graph info of selected objects
         filtered_objects_names, filtered_objects_id = get_graph_info_from_objects_names(self.full_graph, filtered_objects)
-
+        # ipdb.set_trace()
         # Filter 3: Select interacting objects relevant for the task
         filtered_interactions_names, filtered_interactions_ids = self.filter_interactions(filtered_objects_id, filtered_objects_names)
-
+        # ipdb.set_trace()
         # Selected objects: combination of filtered objects and their filtered interacting objects
         ids_selected_combined = filtered_objects_id + filtered_interactions_ids
         names_selected_combined = filtered_objects_names + filtered_interactions_names

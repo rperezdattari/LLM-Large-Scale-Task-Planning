@@ -105,6 +105,16 @@ def add_beer(graph, id=1001):
     fridge = find_nodes(graph_1, class_name='fridge')[0]
     
     add_node(graph_1, {'category': 'food', 'class_name': 'beer', 'id': id, 'properties': [], 'states': []})
+    # add_node(graph_1, {'category': 'food', 'class_name': 'apple', 'id': id, 'properties': [], 'states': []})
+    add_edge(graph_1, id, 'INSIDE', fridge['id'])
+    return graph_1
+
+def add_cupcake(graph, id=1001):
+    graph_1 = clean_graph(graph)
+    fridge = find_nodes(graph_1, class_name='fridge')[0]
+    add_node(graph_1, {'category': 'food', 'class_name': 'book', 'id': id, 'properties': [], 'states': []})
+    # add_node(graph_1, {'category': 'food', 'class_name': 'cupcake', 'id': id, 'properties': [], 'states': []})
+    # add_node(graph_1, {'category': 'food', 'class_name': 'pancake', 'id': id, 'properties': [], 'states': []})
     add_edge(graph_1, id, 'INSIDE', fridge['id'])
     return graph_1
 

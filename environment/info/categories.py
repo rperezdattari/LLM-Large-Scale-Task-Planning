@@ -113,6 +113,7 @@ categories = [
     {'class_name': 'painkillers', 'category 1': 'Healthcare', 'category 2': 'Medicine'},
     {'class_name': 'closetdrawer', 'category 1': 'Furniture', 'category 2': 'Storage'},
     {'class_name': 'cupcake', 'category 1': 'Food', 'category 2': 'Bakery'},
+    {'class_name': 'pudding', 'category 1': 'Food', 'category 2': 'Bakery'},
     {'class_name': 'wineglass', 'category 1': 'Kitchenware'},
     {'class_name': 'slippers', 'category 1': 'Clothing', 'category 2': 'Footwear'},
     {'class_name': 'clock', 'category 1': 'Electronics', 'category 2': 'Timekeeping'},

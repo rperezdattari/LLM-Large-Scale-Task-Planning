@@ -1,6 +1,11 @@
+# exp_1 = {'policy type': 'LLM',
+#          'policy execution': 'online',
+#          'LLM model': 'gpt-4-1106-preview',
+#          'filter objects': True}
+
 exp_1 = {'policy type': 'LLM',
          'policy execution': 'online',
-         'LLM model': 'gpt-4-1106-preview',
+         'LLM model': 'gpt-4o',
          'filter objects': True}
 
 exp_2 = {'policy type': 'LLM',
@@ -33,4 +38,4 @@ exp_7 = {'policy type': 'mcts_2',
          'LLM model': 'gpt-3.5-turbo-1106',
          'filter objects': True}
 
-experiments = [exp_3]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
+experiments = [exp_1]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]

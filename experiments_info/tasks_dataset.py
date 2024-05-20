@@ -1,0 +1,252 @@
+
+# tasks = [
+#      {'goal': {0: {'inside_bellpepper_305': 2, 'inside_book_111': 2, 'on_cutleryfork_238': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_bellpepper_305': 2, 'inside_book_111': 1, 'on_cutleryfork_238': 1}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_bellpepper_305': 2, 'on_cutleryfork_238': 2}}, 'id': 0}, # fail
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_wineglass_231': 2, 'on_mug_111': 1}}, 'id': 0}, # success
+# ]
+
+tasks = [
+     {'goal': {0: {'on_wineglass_231': 2, 'on_mug_111': 1, 'on_apple_111': 2}}, 'id': 0}, # success
+]
+
+''' env 0'''
+# tasks = [
+#      {'goal': {0: {'inside_bellpepper_305': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_book_111': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_mug_111': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_cutleryfork_238': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_wineglass_231': 2}}, 'id': 0},  
+# ]
+
+
+# tasks = [
+#      {'goal': {0: {'on_cutleryfork_111': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_apple_111': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_apple_111': 2}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_pie_305': 1}}, 'id': 0},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_creamybuns_305': 1}}, 'id': 0},
+# ]
+
+''' env 1'''
+# tasks = [
+#      {'goal':{0: {'on_plate_210': 2}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_mug_199': 1}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_fryingpan_228': 1}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_cutleryknife_228': 1}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_dishbowl_199': 1}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_poundcake_86': 1}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_breadslice_86': 2}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_apple_210': 1}}, 'id':1},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_creamybuns_210': 2}}, 'id':1},
+# ]
+
+
+# tasks = [
+#      {'goal':{0: {'inside_book_83': 2}}, 'id':1},
+# ]
+
+
+'''env 2'''
+# tasks = [
+#      {'goal': {0: {'inside_book_158': 1, 'turnon_163': 1}}, 'id': 2},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_book_158': 2}}, 'id': 2},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_plate_165': 2}}, 'id': 2},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_cutleryfork_165': 2}}, 'id': 2},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_cutleryknife_165': 2}}, 'id': 2},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_milk_162': 2}}, 'id': 2},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'inside_salmon_162': 1}}, 'id': 2},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_cupcake_215': 1}}, 'id': 2},
+# ]
+
+
+''' env 3'''
+# tasks = [
+#      {'goal':{0: {'inside_plate_104': 1, 'inside_waterglass_104': 2, 'inside_wineglass_104': 1, 'inside_cutleryfork_104': 2}}, 'id':3},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_cutleryfork_104': 2}}, 'id':3},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_apple_104': 3}}, 'id':3},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_book_269': 3}}, 'id':3},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_crackers_72': 1}}, 'id':3},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_peach_72': 1}}, 'id':3},
+# ]
+
+''' env 4 '''
+# tasks = [
+#      {'goal':{0: {'inside_cupcake_157': 2}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_pudding_157': 1, 'inside_pie_157': 1}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_cereal_138': 1}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_chocolatesyrup_138': 1}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_mincedmeat_138': 1}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_mincedmeat_157': 1}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_breadslice_138': 2}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_mug_156': 2}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_plate_156': 2}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_plate_156': 2, 'inside_mug_156': 2}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'inside_wineglass_156': 2}}, 'id':4},
+# ]
+
+# tasks = [
+#      {'goal':{0: {'on_condimentbottle_138': 2}}, 'id':4},
+# ]
+
+'''env 5'''
+
+# tasks = [
+#      {'goal': {0: {'on_beer_186': 2}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_mug_106': 1}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_plate_106': 2}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_cutleryfork_189': 2}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_cutleryknife_189': 2}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_cutleryknife_189': 2}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_whippedcream_189': 1}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_milk_189': 1}}, 'id': 5},
+# ]
+
+# tasks = [
+#      {'goal': {0: {'on_carrot_186': 1}}, 'id': 5},
+# ]
+

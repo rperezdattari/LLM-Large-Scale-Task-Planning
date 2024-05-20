@@ -6,7 +6,7 @@ import ipdb
 import numpy as np
 import json
 import copy
-from utils import add_beer
+from utils import add_beer, add_cupcake
 
 with open('environment/info/object_info.json') as f:
     object_info = json.load(f)
@@ -63,6 +63,12 @@ class UnityEnvironment(BaseUnityEnvironment):
         graph = super().get_graph()
         graph = add_beer(graph, id=1001)
         graph = add_beer(graph, id=1002)
+        return graph
+    
+    def add_cupcakes(self):
+        graph = super().get_graph()
+        graph = add_cupcake(graph, id=1005)
+        graph = add_cupcake(graph, id=1006)
         return graph
 
     # def reward(self):
@@ -157,7 +163,8 @@ class UnityEnvironment(BaseUnityEnvironment):
 
         self.task_id = task_id
         self.init_graph = copy.deepcopy(init_graph)
-        self.init_rooms = ['bedroom', 'kitchen']
+
+        # self.init_rooms = ['bedroom', 'kitchen']
         # if task_goal is None:
         #     self.task_goal = env_task['task_goal']
         # else:
@@ -206,6 +213,15 @@ class UnityEnvironment(BaseUnityEnvironment):
             success, m = self.comm.expand_scene(updated_graph)
         else:
             success = True
+        # if self.init_graph is not None:
+        #     updated_graph = init_graph
+        #     s, g = self.comm.environment_graph()
+        #     # print("updated graph: ", updated_graph)
+        #     updated_graph = utils.separate_new_ids_graph(updated_graph, max_id)
+        #     success, m = self.comm.expand_scene(updated_graph)
+        #     print("success: ", success, " m: ", m)
+        # else:
+        #     success = True
 
         if not success:
             ipdb.set_trace()
@@ -239,6 +255,7 @@ class UnityEnvironment(BaseUnityEnvironment):
         self.steps = 0
         self.prev_reward = 0.
         return obs
+        # return [graph]
 
     def step(self, action_dict):
         script_list = utils.convert_action(action_dict)
