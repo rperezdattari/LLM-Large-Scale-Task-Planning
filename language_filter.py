@@ -294,6 +294,7 @@ class LanguageFilter:
             filtered_objects_names = []
             filtered_objects_ids = []
             for object in filtered_objects:
+                print("object: ",object)
                 name = object.split(' ')[0]
                 id = int(object.split(' ')[1].replace('.', '')[1:-1])
                 filtered_objects_names.append(name)
@@ -335,10 +336,12 @@ class LanguageFilter:
         # ipdb.set_trace()
         objects_names_categories = self.get_categories_objects()
         # print("objects_names_categories: ", objects_names_categories)
-        from utils import find_nodes
-        print("-------------------------------------------------------")
-        print("find nodes: ", find_nodes(self.full_graph[0],class_name= 'apple'))
+        
+        # from utils import find_nodes
+        # print("-------------------------------------------------------")
+        # print("find nodes: ", find_nodes(self.full_graph[0],class_name= 'apple'))
         # ipdb.set_trace()
+        
         # Filter 1: Get initial subset of objects via categories
         selected_objects = self.filter_categories(objects_names_categories)
         # ipdb.set_trace()

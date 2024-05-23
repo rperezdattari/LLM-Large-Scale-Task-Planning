@@ -24,7 +24,7 @@
 # ]
 
 # tasks = [
-#      {'goal': {0: {'inside_book_111': 2}}, 'id': 0},
+#      {'goal': {0: {'on_book_111': 2}}, 'id': 0},
 # ]
 
 # tasks = [
@@ -166,7 +166,7 @@
 # ]
 
 # tasks = [
-#      {'goal':{0: {'inside_apple_104': 3}}, 'id':3},
+#      {'goal':{0: {'inside_apple_103': 3}}, 'id':3},
 # ]
 
 # tasks = [

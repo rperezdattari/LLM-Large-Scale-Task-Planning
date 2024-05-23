@@ -9,7 +9,6 @@ import pickle
 import json
 from mcts.mcts import MCTSAgent
 # from experiments_info.tasks import tasks
-from experiments_info.tasks_dataset import tasks
 import os
 from experiments_info.experiments_parameters import experiments
 
@@ -67,6 +66,19 @@ if __name__ == "__main__":
         policy_execution = experiment['policy execution']
         LLM_model = experiment['LLM model']
         filter_objects = experiment['filter objects']
+        dataset_type = experiment['Dataset']
+        if dataset_type == '1task':
+            from experiments_info.tasks_dataset_1task import tasks
+        elif dataset_type == '2task':
+            from experiments_info.tasks_dataset_2task import tasks
+        elif dataset_type == '3task':
+            from experiments_info.tasks_dataset_3task import tasks
+        elif dataset_type == '4task':
+            from experiments_info.tasks_dataset_4task import tasks
+        elif dataset_type == '5task':
+            from experiments_info.tasks_dataset_5task import tasks
+        else:
+            tasks = None
 
         args = parse_args()
 
@@ -81,19 +93,19 @@ if __name__ == "__main__":
         ####
         # filename = 'gen_data/dataset/test_env_set_help.pik'
         
-        filename = 'gen_data/dataset/new_train_set_2_subtasks.pik'
-        with open(filename, 'rb') as file:
-            # Load the object from the file
-            dataset_list = pickle.load(file)
+        # filename = 'gen_data/dataset/new_train_set_2_subtasks.pik'
+        # with open(filename, 'rb') as file:
+        #     # Load the object from the file
+        #     dataset_list = pickle.load(file)
 
-        # 'env_id', 'init_graph'
+        # # 'env_id', 'init_graph'
         
-        for env in dataset_list:
-            g = env['init_graph']
-            id2node = {node['id']: node['class_name'] for node in g['nodes']}
-            cloth_ids = [node['id'] for node in g['nodes'] if node['class_name'] in ["clothespile"]]
-            g['nodes'] = [node for node in g['nodes'] if node['id'] not in cloth_ids]
-            g['edges'] = [edge for edge in g['edges'] if edge['from_id'] not in cloth_ids and edge['to_id'] not in cloth_ids]
+        # for env in dataset_list:
+        #     g = env['init_graph']
+        #     id2node = {node['id']: node['class_name'] for node in g['nodes']}
+        #     cloth_ids = [node['id'] for node in g['nodes'] if node['class_name'] in ["clothespile"]]
+        #     g['nodes'] = [node for node in g['nodes'] if node['id'] not in cloth_ids]
+        #     g['edges'] = [edge for edge in g['edges'] if edge['from_id'] not in cloth_ids and edge['to_id'] not in cloth_ids]
 
         results = []
         succ, total = 0, 0
@@ -142,13 +154,13 @@ if __name__ == "__main__":
             # 1. target (such as dishwasher) has different id
             # 2. missing objects, try to see whether we can add the missing objects into the environment
 
-            interested_item_list = ['fridge', 'tv', 'apple', 'chips', 'cupcake', 'pudding', 'whippedcream', 'pie', 'candybar', 'crackers', 'breadslice', 'bananas', 'lime', 'peach', 'plum',
-                                    'cereal', 'juice', 'milk', 'carrot', 'salad', 'mincedmeat', 'bellpepper', 'poundcake', 'chocolatesyrup', 'creamybuns', 'salmon', 'book', 'bookshelf']
-            interested_item_list_clean_kicten = ['kitchencounter', 'dishwasher', "coffeetable", 'kitchentable', 'fridge', 'mug', 'plate', 'dishbowl', 'wineglass', 'condimentbottle', 'fryingpan', 'cutleryknife', 'cutleryfork']
-            for item in interested_item_list:
-                print(item, " find nodes of obs: ", find_nodes(graph,class_name= item))
-            # print("obs[0] nodes: ", len(obs[0]['nodes']), len(obs[0]['edges']))
-            # print("obs: ", obs)
+            # interested_item_list = ['fridge', 'tv', 'apple', 'chips', 'cupcake', 'pudding', 'whippedcream', 'pie', 'candybar', 'crackers', 'breadslice', 'bananas', 'lime', 'peach', 'plum',
+            #                         'cereal', 'juice', 'milk', 'carrot', 'salad', 'mincedmeat', 'bellpepper', 'poundcake', 'chocolatesyrup', 'creamybuns', 'salmon', 'book', 'bookshelf']
+            # interested_item_list_clean_kicten = ['kitchencounter', 'dishwasher', "coffeetable", 'kitchentable', 'fridge', 'mug', 'plate', 'dishbowl', 'wineglass', 'condimentbottle', 'fryingpan', 'cutleryknife', 'cutleryfork']
+            # for item in interested_item_list:
+            #     print(item, " find nodes of obs: ", find_nodes(graph,class_name= item))
+            # # print("obs[0] nodes: ", len(obs[0]['nodes']), len(obs[0]['edges']))
+            # # print("obs: ", obs)
             obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)
 
             # Get valid actions
@@ -232,6 +244,8 @@ if __name__ == "__main__":
             actions = []
             done = False
             # Iterate over episode
+            if policy_type == 'LLM':
+                args.max_depth = 60
             for j in range(args.max_depth + 1):  # TODO: check this, currently being set w.r.t. MCTS, but it could be different in the case of LLM
                 print(" ---------------------- Step: ", j, " ---------------------- ")
 
@@ -306,7 +320,7 @@ if __name__ == "__main__":
         results_json = json.dumps(results)
 
         # Save results
-        json_file_name = "results_filter_%s_policy_type_%s_policy_execution_%s_LLM_%s.json" \
-                         % (str(filter_objects), policy_type, policy_execution, LLM_model)
+        json_file_name = "results_filter_%s_policy_type_%s_policy_execution_%s_dataSet_%s_LLM_%s.json" \
+                         % (str(filter_objects), policy_type, policy_execution, dataset_type, LLM_model)
         with open('results/evaluations/' + json_file_name, 'w', encoding='utf-8') as file:
             json.dump(results_json, file, ensure_ascii=False, indent=4)

@@ -6,21 +6,25 @@
 exp_1 = {'policy type': 'LLM',
          'policy execution': 'online',
          'LLM model': 'gpt-4o',
+         'Dataset': '5task',
          'filter objects': True}
 
 exp_2 = {'policy type': 'LLM',
          'policy execution': 'online',
+         'Dataset': '1task',
          'LLM model': 'gpt-3.5-turbo-1106',
          'filter objects': True}
 
 exp_3 = {'policy type': 'mcts',
          'policy execution': 'offline',
-         'LLM model': 'gpt-4-1106-preview',
+         'LLM model': 'gpt-4o',
+         'Dataset': '5task',
          'filter objects': True}
 
 exp_4 = {'policy type': 'mcts',
          'policy execution': 'offline',
          'LLM model': 'gpt-4-1106-preview',
+         'Dataset': '5task',
          'filter objects': False}
 
 exp_5 = {'policy type': 'mcts',

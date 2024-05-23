@@ -492,6 +492,10 @@ class MCTSAgent:
         if state_node.done or depth == self.max_depth:
             return 0, state_node, self.last_history
 
+        if len(state_node.children) == 0:
+            state_node.N += 1
+            return 0, state_node, self.last_history
+
         print("SIMULATE: state_node:  child number: ", len(state_node.children), " action: ", state_node.valid_actions)
         best_action_node_idx = self.greedy_action_node(state_node, self.exploration_constant, self.bonus_constant)
         best_action_node = state_node.children[best_action_node_idx]
