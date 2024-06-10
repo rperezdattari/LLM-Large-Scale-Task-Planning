@@ -124,36 +124,36 @@ for i in list_data:
 
 '''Process the dataset'''
 
-# number_subtask = 6
-# new_dataset = []
-# for i in range(0, len(dataset_list)):
+number_subtask = 6
+new_dataset = []
+for i in range(0, len(dataset_list)):
    
-#     graph = dataset_list[i]['init_graph'] 
-#     # print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
+    graph = dataset_list[i]['init_graph'] 
+    # print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
 
-#     test_data_id = i
-#     env_id = dataset_list[test_data_id]['env_id']
-#     task_goal = dataset_list[test_data_id]['task_goal'][0]
-#     graph = dataset_list[test_data_id]['init_graph']
-#     # print("graph: ", graph.)
-#     # print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
+    test_data_id = i
+    env_id = dataset_list[test_data_id]['env_id']
+    task_goal = dataset_list[test_data_id]['task_goal'][0]
+    graph = dataset_list[test_data_id]['init_graph']
+    # print("graph: ", graph.)
+    # print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
 
-#     task_goal_env = get_goal(task_goal)
-#     satisfied, unsatisfied  = utils.check_progress(graph, task_goal_env)
-#     if is_task_completed(satisfied):
-#         print("--------------------------------------------------------------------------")
-#         print("satisfied: ", satisfied, " is_task_completed: ", is_task_completed(satisfied))
-#         print("unsatisfied: ", unsatisfied)
+    task_goal_env = get_goal(task_goal)
+    satisfied, unsatisfied  = utils.check_progress(graph, task_goal_env)
+    if is_task_completed(satisfied):
+        print("--------------------------------------------------------------------------")
+        print("satisfied: ", satisfied, " is_task_completed: ", is_task_completed(satisfied))
+        print("unsatisfied: ", unsatisfied)
 
-#         print(i, " task name: ", dataset_list[i]['task_name'],  " task_goal: ", dataset_list[i]['task_goal'][0], " level: ", dataset_list[i]['level'])
-#     else:
-#         new_item = generate_subset_tasks(dataset_list[i], number_subtask)
-#         if new_item is not None:
-#             new_dataset.append(new_item)
-#             print(i, "new_item task name: ", new_item['task_name'],  " task_goal: ", new_item['task_goal'], " level: ", new_item['level'])
-#         else:
-#             print(i," None")
-#     print(i, " task name: ", dataset_list[i]['task_name'],  " task_goal: ", dataset_list[i]['task_goal'][0], " level: ", dataset_list[i]['level'])
+        print(i, " task name: ", dataset_list[i]['task_name'],  " task_goal: ", dataset_list[i]['task_goal'][0], " level: ", dataset_list[i]['level'])
+    else:
+        new_item = generate_subset_tasks(dataset_list[i], number_subtask)
+        if new_item is not None:
+            new_dataset.append(new_item)
+            print(i, "new_item task name: ", new_item['task_name'],  " task_goal: ", new_item['task_goal'], " level: ", new_item['level'])
+        else:
+            print(i," None")
+    print(i, " task name: ", dataset_list[i]['task_name'],  " task_goal: ", dataset_list[i]['task_goal'][0], " level: ", dataset_list[i]['level'])
 
 # with open(f'gen_data/dataset/new_train_set_{number_subtask}_subtasks.pik', 'wb') as new_file:
 #     pickle.dump(new_dataset, new_file)
