@@ -49,3 +49,5 @@ new_tasks = create_task_combinations(individual_subtasks, num_subtasks)
 # Output the new tasks
 for task in new_tasks:
     print(task)
+
+

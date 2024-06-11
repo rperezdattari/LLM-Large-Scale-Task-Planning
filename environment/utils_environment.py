@@ -246,6 +246,70 @@ def parse_language_from_goal_script(goal_script, goal_num, init_graph, template=
     return goal_language
 
 
+def parse_language_from_goal_script_output_object(goal_script, goal_num, init_graph, template=0):
+    goal_script_split = goal_script.split('_')
+    tar = None
+    if 'closed' in goal_script.lower():
+        obj = goal_script_split[1]
+
+        for node in init_graph['nodes']:
+            if node['id'] == int(obj):
+                tar_node = node
+                tar_id = node['id']
+
+        if template == 1:
+            goal_language = 'could you please close the %s' % (tar_node['class_name'])
+        elif template == 2:
+            goal_language = 'please close the %s' % (tar_node['class_name'])
+        else:
+            goal_language = 'close %s (%i)' % (tar_node['class_name'], tar_id)
+
+    elif 'turnon' in goal_script.lower():
+        obj = goal_script_split[1]
+        for node in init_graph['nodes']:
+            if node['id'] == int(obj):
+                tar_node = node
+                tar_id = node['id']
+
+        if template == 1:
+            goal_language = 'could you please turn on the %s' % (tar_node['class_name'])
+        elif template == 2:
+            goal_language = 'next turn on the %s' % (tar_node['class_name'])
+        else:
+            goal_language = 'turn on %s (%i)' % (tar_node['class_name'], tar_id)
+
+    elif 'on_' in goal_script.lower() or 'inside_' in goal_script.lower():
+        numbers = {'1': 'one',
+                   '2': 'two',
+                   '3': 'three'}
+
+        rel = goal_script_split[0]
+        obj = goal_script_split[1]
+        tar = goal_script_split[2]
+        for node in init_graph['nodes']:
+            if node['id'] == int(tar):
+                tar_node = node
+                tar_id = node['id']
+
+        plural = ''
+        if goal_num > 1:
+            plural = 's'
+
+        if template == 1:
+            goal_language = 'could you please place %d %s %s the %s' % (goal_num, obj, rel, tar_node['class_name'])
+        elif template == 2:
+            goal_language = 'get %d %s and put it %s the %s' % (goal_num, obj, rel, tar_node['class_name'])
+        else:
+            goal_language = 'put %s %s%s %s the %s (%i)' % (numbers[str(goal_num)], obj, plural, rel, tar_node['class_name'], tar_id)
+    else:
+        pdb.set_trace()
+    goal_language = goal_language.lower()
+    if tar is None:
+        return [obj]
+    else:
+        return [obj, tar_node['class_name']]
+
+
 def get_goal_language(task_goal, init_graph, template=0):
     goals_list = [parse_language_from_goal_script(subgoal, subgoal_count, init_graph, template=template) for subgoal, subgoal_count in task_goal.items()]
 

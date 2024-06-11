@@ -44,6 +44,7 @@ def get_filtered_objects(graph, goal_language, LLM_model):
             loaded_dict = pickle.load(file)
         selected_objects_id = loaded_dict['selected objects id']
         selected_objects_names = loaded_dict['selected objects names']
+        print("selected_objects_id: ", selected_objects_id, " selected_objects_names: ", selected_objects_names)
         print('Filtered objects file existed and loaded!')
     else:
         # Filter objects and save them
@@ -124,7 +125,7 @@ if __name__ == "__main__":
             # # graph = dataset_list[test_data_id]['init_graph']
             # graph = dataset_list[test_data_id]['init_graph']
             from utils import find_nodes
-            # print("find nodes of initial graph apple: ", find_nodes(graph,class_name= 'dishwasher'))
+            # print("find nodes of initial graph apple: ", find_nodes(graph,class_name= 'bellpepper'))
             # print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
             # print("graph: ", graph.)
             # print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
@@ -159,6 +160,8 @@ if __name__ == "__main__":
             # interested_item_list_clean_kicten = ['kitchencounter', 'dishwasher', "coffeetable", 'kitchentable', 'fridge', 'mug', 'plate', 'dishbowl', 'wineglass', 'condimentbottle', 'fryingpan', 'cutleryknife', 'cutleryfork']
             # for item in interested_item_list:
             #     print(item, " find nodes of obs: ", find_nodes(graph,class_name= item))
+            object_nodes = find_nodes(graph,class_name= 'bellpepper')
+            print("find nodes of initial graph apple: ", len(object_nodes), [object_nodes[i]['id'] for i in range(0,  len(object_nodes))])
             # # print("obs[0] nodes: ", len(obs[0]['nodes']), len(obs[0]['edges']))
             # # print("obs: ", obs)
             obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)

@@ -1,5 +1,5 @@
 from environment.unity_environment import UnityEnvironment
-from environment.utils_environment import get_goal_language, filter_valid_actions
+from environment.utils_environment import get_goal_language, filter_valid_actions, parse_language_from_goal_script_output_object
 from utils import get_total_states
 from llm_policy import LLMPolicy
 from language_filter import LanguageFilter
@@ -8,7 +8,7 @@ import argparse
 import pickle
 import json
 from mcts.mcts import MCTSAgent
-from experiments_info.tasks import tasks
+# from experiments_info.tasks import tasks
 import os
 from experiments_info.experiments_parameters import experiments
 
@@ -116,6 +116,19 @@ if __name__ == "__main__":
         policy_execution = experiment['policy execution']
         LLM_model = experiment['LLM model']
         filter_objects = experiment['filter objects']
+        dataset_type = experiment['Dataset']
+        if dataset_type == '1task':
+            from experiments_info.tasks_dataset_1task import tasks
+        elif dataset_type == '2task':
+            from experiments_info.tasks_dataset_2task import tasks
+        elif dataset_type == '3task':
+            from experiments_info.tasks_dataset_3task import tasks
+        elif dataset_type == '4task':
+            from experiments_info.tasks_dataset_4task import tasks
+        elif dataset_type == '5task':
+            from experiments_info.tasks_dataset_5task import tasks
+        else:
+            tasks = None
 
         args = parse_args()
 
@@ -130,46 +143,40 @@ if __name__ == "__main__":
         ####
         # filename = 'gen_data/dataset/test_env_set_help.pik'
         
-        filename = 'gen_data/dataset/new_train_set_2_subtasks.pik'
-        with open(filename, 'rb') as file:
-            # Load the object from the file
-            dataset_list = pickle.load(file)
+        # filename = 'gen_data/dataset/new_train_set_2_subtasks.pik'
+        # with open(filename, 'rb') as file:
+        #     # Load the object from the file
+        #     dataset_list = pickle.load(file)
 
-        # 'env_id', 'init_graph'
+        # # 'env_id', 'init_graph'
         
-        for env in dataset_list:
-            g = env['init_graph']
-            id2node = {node['id']: node['class_name'] for node in g['nodes']}
-            cloth_ids = [node['id'] for node in g['nodes'] if node['class_name'] in ["clothespile"]]
-            g['nodes'] = [node for node in g['nodes'] if node['id'] not in cloth_ids]
-            g['edges'] = [edge for edge in g['edges'] if edge['from_id'] not in cloth_ids and edge['to_id'] not in cloth_ids]
+        # for env in dataset_list:
+        #     g = env['init_graph']
+        #     id2node = {node['id']: node['class_name'] for node in g['nodes']}
+        #     cloth_ids = [node['id'] for node in g['nodes'] if node['class_name'] in ["clothespile"]]
+        #     g['nodes'] = [node for node in g['nodes'] if node['id'] not in cloth_ids]
+        #     g['edges'] = [edge for edge in g['edges'] if edge['from_id'] not in cloth_ids and edge['to_id'] not in cloth_ids]
 
         results = []
         succ, total = 0, 0
 
-        data_id_without_missing_data = []
-
-        dict_missing_data_per_env = {}
-        for i in range(7):
-            dict_missing_data_per_env[str(i)] = []
         # Iterate through every evaluation task
-        # for task in tasks:
+        for task in tasks:
         # new_train_set_2_subtasks: 2 is not able to be used because the 'holds' action is not considered in parse_language_from_goal_script
-        # for test_data_id in range(0, len(dataset_list)):
-        for test_data_id in range(32,33):
+        # for test_data_id in range(3, 13):
+        # for test_data_id in range(44, 45):
             # Get task goal
-            # task_goal = task['goal'][0]
-            # env_id = task['id']
-            print("-----------------------------------------------------------")
-            env_id = dataset_list[test_data_id]['env_id']
-            task_goal = dataset_list[test_data_id]['task_goal'][0]
-            graph = dataset_list[test_data_id]['init_graph']
-            print("env id: ", env_id)
+            task_goal = task['goal'][0]
+            env_id = task['id']
+            print("---------------------------------------------")
+            print("task goal: ", task_goal, "env id: ", env_id)
+            # env_id = dataset_list[test_data_id]['env_id']
+            # task_goal = dataset_list[test_data_id]['task_goal'][0]
+            # # graph = dataset_list[test_data_id]['init_graph']
+            # graph = dataset_list[test_data_id]['init_graph']
             from utils import find_nodes
-            # print("find nodes of initial graph apple: ", find_nodes(graph,class_name= 'fridge'))
-
-
-
+            # print("find nodes of initial graph apple: ", find_nodes(graph,class_name= 'bellpepper'))
+            # print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
             # print("graph: ", graph.)
             # print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
 
@@ -179,7 +186,7 @@ if __name__ == "__main__":
                                      port_id=2,
                                      env_task_set=None,  # env_task_set,#[env_task_set[0]],
                                      observation_types=['full'],
-                                     use_editor=False,
+                                     use_editor=True,
                                      task_goal=[task_goal],
                                      executable_args=executable_args,
                                      base_port=8080,
@@ -190,44 +197,43 @@ if __name__ == "__main__":
             vhenv.reset(task_goal=task_goal,env_id=env_id)
 
             # Add beers and restart again TODO: this should not be done, or at least not here
-            
+            graph = vhenv.add_beers()
 
-            obs = vhenv.reset(task_goal=task_goal, init_graph=graph, env_id=env_id, add_character=True)
-            # graph = vhenv.add_cupcakes()
-            # graph = vhenv.add_beers()
-            # obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=True)
-            # graph = vhenv.add_cupcake()
-
-            print("find nodes of initial graph apple: ", find_nodes(obs[0],class_name= 'fridge'))
-
-            # Get goal language
-            goal_language = get_goal_language(task_goal, graph)
-            print('Goal:', goal_language)
-
-            missing_objects = False
-            for subgoal, subgoal_count in task_goal.items():
-                print("subgoal: ", subgoal)
-                print("subgoal_count: ", subgoal_count)
-                goal_script_split = subgoal.split('_')
-                rel = goal_script_split[0]
-                obj = goal_script_split[1]
-                tar = goal_script_split[2]
-                print("obj: ", obj, " find nodes of obs: ", len(find_nodes(obs[0],class_name= obj)))
-                print("obj: ", obj, " find nodes of obs: ", find_nodes(obs[0],class_name= obj))
-                if len(find_nodes(obs[0],class_name= obj)) == 0:
-                    missing_objects = True
-                    dict_missing_data_per_env[str(env_id)].append(obj)
-            
-            if missing_objects is False:
-                data_id_without_missing_data.append(test_data_id)
+            # obs = vhenv.reset(task_goal=task_goal, init_graph=graph, env_id=env_id, add_character=True)
 
             # to do, needs to find the map from the task in the dataset to the task that is consistent with the obs
             # 1. target (such as dishwasher) has different id
             # 2. missing objects, try to see whether we can add the missing objects into the environment
-                
-    print("data_id_without_missing_data: ", data_id_without_missing_data)
-    print("dict_missing_data_per_env: ", dict_missing_data_per_env)
-    # data_id_without_missing_data:  [6, 9, 17, 27, 32, 44, 57, 66, 71, 78, 82, 91]
 
+            # interested_item_list = ['fridge', 'tv', 'apple', 'chips', 'cupcake', 'pudding', 'whippedcream', 'pie', 'candybar', 'crackers', 'breadslice', 'bananas', 'lime', 'peach', 'plum',
+            #                         'cereal', 'juice', 'milk', 'carrot', 'salad', 'mincedmeat', 'bellpepper', 'poundcake', 'chocolatesyrup', 'creamybuns', 'salmon', 'book', 'bookshelf']
+            # interested_item_list_clean_kicten = ['kitchencounter', 'dishwasher', "coffeetable", 'kitchentable', 'fridge', 'mug', 'plate', 'dishbowl', 'wineglass', 'condimentbottle', 'fryingpan', 'cutleryknife', 'cutleryfork']
+            # for item in interested_item_list:
+            #     print(item, " find nodes of obs: ", find_nodes(graph,class_name= item))
+            goal_language = get_goal_language(task_goal, graph)
+            print('Goal language:', goal_language) 
+
+            obs_list = [parse_language_from_goal_script_output_object(subgoal, subgoal_count, graph, template=0) for subgoal, subgoal_count in task_goal.items()]
+            
+            # Flatten the list and remove duplicates
+            seen = set()
+            flattened_obs__list = []
+            for sublist in obs_list:
+                for item in sublist:
+                    if item not in seen:
+                        flattened_obs__list.append(item)
+                        seen.add(item)
+            # obs_list = [item for sublist in obs_list for item in sublist]
+            # obs_list = [item for subgoal, subgoal_count in task_goal.items() for item in parse_language_from_goal_script_output_object(subgoal, subgoal_count, graph, template=0)]
+
+            print("obs_list: ",flattened_obs__list)
+            
+            groundtruth_object_ids = []
+            for object_name in flattened_obs__list:
+                object_nodes = find_nodes(graph,class_name= object_name)
+                object_ids = [object_nodes[i]['id'] for i in range(0,  len(object_nodes))]
+                groundtruth_object_ids = groundtruth_object_ids + object_ids
+                print("find nodes of initial graph apple: ", len(object_nodes), object_ids)
+            print("groundtruth_object_ids: ", groundtruth_object_ids)
 
             
