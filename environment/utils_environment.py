@@ -304,10 +304,11 @@ def parse_language_from_goal_script_output_object(goal_script, goal_num, init_gr
     else:
         pdb.set_trace()
     goal_language = goal_language.lower()
-    if tar is None:
-        return [obj]
-    else:
-        return [obj, tar_node['class_name']]
+    # if tar is None:
+    #     return [obj]
+    # else:
+    #     return [obj, tar_node['class_name']]
+    return obj, tar
 
 
 def get_goal_language(task_goal, init_graph, template=0):

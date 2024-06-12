@@ -46,7 +46,7 @@ tasks = [
     {'goal': {0: {'on_mug_106': 1}}, 'id': 5} 
 ]
 # tasks = [
-# {'goal': {0: {'inside_apple_103': 1}}, 'id': 3}
+# {'goal': {0: {'on_book_111': 1}}, 'id': 0},
 # ]
 
 

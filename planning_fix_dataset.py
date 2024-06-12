@@ -14,7 +14,7 @@ from experiments_info.experiments_parameters import experiments
 
 from test_mcts_agents import MCTS_agent
 
-
+from utils import find_edges_from, find_edges_to
 
 
 import ipdb
@@ -197,7 +197,7 @@ if __name__ == "__main__":
             print('Goal language:', goal_language) 
 
             obs_list = [parse_language_from_goal_script_output_object(subgoal, subgoal_count, graph, template=0) for subgoal, subgoal_count in task_goal.items()]
-            
+            print("obs_list: ", obs_list)
             # Flatten the list and remove duplicates
             seen = set()
             flattened_obs__list = []
@@ -208,15 +208,44 @@ if __name__ == "__main__":
                         seen.add(item)
 
             print("obs_list: ",flattened_obs__list)
+
+            objects_name = []
+            targets_id = []  # such as the id of table or fridge
+
+            # Iterate through the list and classify each item
+            for item in flattened_obs__list:
+                if item is None:
+                    continue
+                elif item.isdigit():
+                    targets_id.append(int(item))
+                else:
+                    objects_name.append(item)
             
             groundtruth_object_ids = []
-            for object_name in flattened_obs__list:
+            groundtruth_object_ids_with_indirect_objects = []
+            for object_name in objects_name:
                 object_nodes = find_nodes(graph,class_name= object_name)
+                # print("object_nodes", object_nodes)
                 object_ids = [object_nodes[i]['id'] for i in range(0,  len(object_nodes))]
+
+                # print("find_edges_from: ", find_edges_from(graph, object_ids[0]))
+                # print("find_edges_to: ", find_edges_to(graph, object_ids[0]))
+                for obj_id in object_ids:
+                    edges_from = find_edges_from(graph, obj_id)
+                    # print("find_edges_from: ", edges_from)
+
+                    for edge in edges_from:
+                        relation, obj = edge
+                        if relation == 'INSIDE' and obj['category'] != 'Rooms':
+                            groundtruth_object_ids_with_indirect_objects.append(obj['id'])
+
                 groundtruth_object_ids = groundtruth_object_ids + object_ids
                 print("find nodes of initial graph apple: ", len(object_nodes), object_ids)
+            groundtruth_object_ids = groundtruth_object_ids + targets_id
+            groundtruth_object_ids_with_indirect_objects = groundtruth_object_ids_with_indirect_objects + groundtruth_object_ids
             print("groundtruth_object_ids: ", groundtruth_object_ids)
             
+
             failure_counts = None
             if filter_objects:
                 selected_objects_id, selected_objects_names, failure_counts = get_filtered_objects(obs, goal_language, LLM_model)
@@ -234,6 +263,7 @@ if __name__ == "__main__":
                 "task_goal": task_goal,
                 "env_id": env_id,
                 "groundtruth_object_ids": groundtruth_object_ids,
+                "groundtruth_object_ids_with_indirect_objects": groundtruth_object_ids_with_indirect_objects,
                 "selected_objects_id": selected_objects_id,
                 "selected_objects_names": selected_objects_names
             }
@@ -242,7 +272,7 @@ if __name__ == "__main__":
 
             if groundtruth_object_ids == selected_objects_id:
                 print("The lists are the same.")
-                difference_log["difference"] = str(False)
+                difference_log["difference groundtruth_object_ids"] = str(False)
             else:
                 groundtruth_not_in_selected = list(set(groundtruth_object_ids) - set(selected_objects_id))
                 selected_not_in_groundtruth = list(set(selected_objects_id) - set(groundtruth_object_ids))
@@ -256,7 +286,7 @@ if __name__ == "__main__":
                 selected_not_in_groundtruth_objName = [find_corresponding_name_via_ID(one_id) for one_id in selected_not_in_groundtruth]
                 
                 print("The lists are different.")
-                difference_log["difference"] = str(True)
+                difference_log["difference groundtruth_object_ids"] = str(True)
                 if groundtruth_not_in_selected:
                     print("Items in groundtruth_object_ids but not in selected_objects_id:", groundtruth_not_in_selected, " name: ", groundtruth_not_in_selected_objName)
                     difference_log["groundtruth_not_in_selected"] = {
@@ -269,6 +299,37 @@ if __name__ == "__main__":
                         "ids": selected_not_in_groundtruth,
                         "names": selected_not_in_groundtruth_objName
                     }
+
+            if groundtruth_object_ids_with_indirect_objects != groundtruth_not_in_selected:
+                if groundtruth_object_ids_with_indirect_objects == selected_objects_id:
+                    print("The lists are the same. groundtruth_object_ids_with_indirect_objects")
+                    difference_log["difference groundtruth_object_ids"] = str(False)
+                else:
+                    groundtruth_not_in_selected = list(set(groundtruth_object_ids_with_indirect_objects) - set(selected_objects_id))
+                    selected_not_in_groundtruth = list(set(selected_objects_id) - set(groundtruth_object_ids_with_indirect_objects))
+
+                    def find_corresponding_name_via_ID(id):
+                        for node in graph['nodes']:
+                            if node['id'] == int(id):
+                                return node['class_name']
+                        
+                    groundtruth_not_in_selected_objName = [find_corresponding_name_via_ID(one_id) for one_id in groundtruth_not_in_selected]
+                    selected_not_in_groundtruth_objName = [find_corresponding_name_via_ID(one_id) for one_id in selected_not_in_groundtruth]
+                    
+                    print("The lists are different. groundtruth_object_ids_with_indirect_objects")
+                    difference_log["difference groundtruth_object_ids_with_indirect_objects"] = str(True)
+                    if groundtruth_not_in_selected:
+                        print("Items in groundtruth_object_ids_with_indirect_objects but not in selected_objects_id:", groundtruth_not_in_selected, " name: ", groundtruth_not_in_selected_objName)
+                        difference_log["groundtruth_with_indirect_objects_not_in_selected"] = {
+                            "ids": groundtruth_not_in_selected,
+                            "names": groundtruth_not_in_selected_objName
+                        }
+                    if selected_not_in_groundtruth:
+                        print("Items in selected_objects_id but not in groundtruth_object_ids_with_indirect_objects:", selected_not_in_groundtruth, " name: ", selected_not_in_groundtruth_objName)
+                        difference_log["selected_not_in_groundtruth_with_indirect_objects"] = {
+                            "ids": selected_not_in_groundtruth,
+                            "names": selected_not_in_groundtruth_objName
+                        }
 
             # Append the result to the log dictionary
             log_data["experiment_results"].append(difference_log)

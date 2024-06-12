@@ -9,14 +9,23 @@
             "env_id": 0,
             "groundtruth_object_ids": [
                 333,
-                305,
                 319,
                 272,
                 276,
                 279,
                 284,
-                111,
-                371
+                305,
+                111
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                333,
+                319,
+                272,
+                276,
+                279,
+                284,
+                305,
+                111
             ],
             "selected_objects_id": [
                 333,
@@ -52,15 +61,16 @@
                 "kitchentable",
                 "floor"
             ],
-            "failure_counts": "1",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
                     231,
                     73,
                     205,
-                    78,
                     206,
+                    78,
+                    371,
                     251
                 ],
                 "names": [
@@ -69,6 +79,28 @@
                     "kitchen",
                     "floor",
                     "floor",
+                    "coffeetable",
+                    "wallshelf"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    231,
+                    73,
+                    205,
+                    206,
+                    78,
+                    371,
+                    251
+                ],
+                "names": [
+                    "kitchentable",
+                    "bedroom",
+                    "kitchen",
+                    "floor",
+                    "floor",
+                    "coffeetable",
                     "wallshelf"
                 ]
             }
@@ -91,12 +123,38 @@
                 293,
                 434,
                 436,
-                111,
-                371,
                 272,
                 276,
                 279,
                 284,
+                111,
+                238
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                105,
+                105,
+                249,
+                249,
+                249,
+                249,
+                249,
+                370,
+                370,
+                190,
+                191,
+                268,
+                289,
+                290,
+                291,
+                292,
+                293,
+                434,
+                436,
+                272,
+                276,
+                279,
+                284,
+                111,
                 238
             ],
             "selected_objects_id": [
@@ -137,8 +195,37 @@
                 "coffeetable",
                 "kitchencounter"
             ],
-            "failure_counts": "0",
-            "difference": "True"
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
+            "selected_not_in_groundtruth": {
+                "ids": [
+                    371
+                ],
+                "names": [
+                    "coffeetable"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    105,
+                    370,
+                    249
+                ],
+                "names": [
+                    "bookshelf",
+                    "bookshelf",
+                    "bookshelf"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    371
+                ],
+                "names": [
+                    "coffeetable"
+                ]
+            }
         },
         {
             "task_goal": {
@@ -149,15 +236,26 @@
             "env_id": 0,
             "groundtruth_object_ids": [
                 319,
-                305,
                 437,
                 438,
-                111,
-                371,
                 197,
                 198,
                 298,
                 299,
+                305,
+                111,
+                231
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                319,
+                437,
+                438,
+                197,
+                198,
+                298,
+                299,
+                305,
+                111,
                 231
             ],
             "selected_objects_id": [
@@ -196,22 +294,43 @@
                 "floor",
                 "floor"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
                     73,
                     205,
                     78,
                     206,
-                    335
+                    335,
+                    371
                 ],
                 "names": [
                     "bedroom",
                     "kitchen",
                     "floor",
                     "floor",
-                    "livingroom"
+                    "livingroom",
+                    "coffeetable"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    73,
+                    205,
+                    78,
+                    206,
+                    335,
+                    371
+                ],
+                "names": [
+                    "bedroom",
+                    "kitchen",
+                    "floor",
+                    "floor",
+                    "livingroom",
+                    "coffeetable"
                 ]
             }
         },
@@ -233,17 +352,48 @@
                 293,
                 434,
                 436,
-                111,
-                371,
                 272,
                 276,
                 279,
                 284,
-                238,
                 197,
                 198,
                 298,
                 299,
+                111,
+                238,
+                231
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                105,
+                105,
+                249,
+                249,
+                249,
+                249,
+                249,
+                370,
+                370,
+                190,
+                191,
+                268,
+                289,
+                290,
+                291,
+                292,
+                293,
+                434,
+                436,
+                272,
+                276,
+                279,
+                284,
+                197,
+                198,
+                298,
+                299,
+                111,
+                238,
                 231
             ],
             "selected_objects_id": [
@@ -302,20 +452,47 @@
                 "bedroom",
                 "kitchen"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
-                    73,
-                    205,
                     230,
-                    105
+                    73,
+                    105,
+                    205,
+                    371
+                ],
+                "names": [
+                    "tvstand",
+                    "bedroom",
+                    "bookshelf",
+                    "kitchen",
+                    "coffeetable"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    249,
+                    370
+                ],
+                "names": [
+                    "bookshelf",
+                    "bookshelf"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    73,
+                    371,
+                    205,
+                    230
                 ],
                 "names": [
                     "bedroom",
+                    "coffeetable",
                     "kitchen",
-                    "tvstand",
-                    "bookshelf"
+                    "tvstand"
                 ]
             }
         },
@@ -331,7 +508,14 @@
                 279,
                 284,
                 111,
-                371,
+                238
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                272,
+                276,
+                279,
+                284,
+                111,
                 238
             ],
             "selected_objects_id": [
@@ -356,15 +540,30 @@
                 "bedroom",
                 "kitchen"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
                     73,
+                    371,
                     205
                 ],
                 "names": [
                     "bedroom",
+                    "coffeetable",
+                    "kitchen"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    73,
+                    371,
+                    205
+                ],
+                "names": [
+                    "bedroom",
+                    "coffeetable",
                     "kitchen"
                 ]
             }
@@ -378,12 +577,21 @@
             "env_id": 1,
             "groundtruth_object_ids": [
                 161,
-                228,
                 232,
                 233,
-                86,
-                289,
-                248
+                248,
+                228,
+                86
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                231,
+                231,
+                161,
+                232,
+                233,
+                248,
+                228,
+                86
             ],
             "selected_objects_id": [
                 161,
@@ -415,10 +623,11 @@
                 "kitchentable",
                 "floor"
             ],
-            "failure_counts": "1",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
+                    289,
                     226,
                     131,
                     199,
@@ -427,10 +636,30 @@
                     126
                 ],
                 "names": [
+                    "coffeetable",
                     "stove",
                     "floor",
                     "kitchentable",
                     "toaster",
+                    "bedroom",
+                    "kitchen"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    289,
+                    226,
+                    131,
+                    199,
+                    50,
+                    126
+                ],
+                "names": [
+                    "coffeetable",
+                    "stove",
+                    "floor",
+                    "kitchentable",
                     "bedroom",
                     "kitchen"
                 ]
@@ -446,15 +675,24 @@
             "groundtruth_object_ids": [
                 158,
                 159,
-                228,
                 243,
                 244,
-                210,
-                221,
-                222,
                 248,
-                86,
-                289
+                228,
+                210,
+                86
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                223,
+                223,
+                158,
+                159,
+                243,
+                244,
+                248,
+                228,
+                210,
+                86
             ],
             "selected_objects_id": [
                 158,
@@ -486,16 +724,37 @@
                 "bookshelf",
                 "bedroom"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
+                    289,
                     50,
+                    221,
+                    222,
                     223
                 ],
                 "names": [
+                    "coffeetable",
                     "bedroom",
+                    "kitchencounter",
+                    "kitchencounter",
                     "bookshelf"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    289,
+                    50,
+                    221,
+                    222
+                ],
+                "names": [
+                    "coffeetable",
+                    "bedroom",
+                    "kitchencounter",
+                    "kitchencounter"
                 ]
             }
         },
@@ -509,12 +768,8 @@
             "groundtruth_object_ids": [
                 158,
                 159,
-                228,
                 243,
                 244,
-                210,
-                221,
-                222,
                 121,
                 165,
                 166,
@@ -522,6 +777,26 @@
                 168,
                 169,
                 260,
+                228,
+                210,
+                199
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                223,
+                223,
+                158,
+                159,
+                243,
+                244,
+                121,
+                165,
+                166,
+                167,
+                168,
+                169,
+                260,
+                228,
+                210,
                 199
             ],
             "selected_objects_id": [
@@ -561,7 +836,36 @@
                 "kitchentable"
             ],
             "failure_counts": "None",
-            "difference": "False"
+            "difference groundtruth_object_ids": "True",
+            "selected_not_in_groundtruth": {
+                "ids": [
+                    221,
+                    222
+                ],
+                "names": [
+                    "kitchencounter",
+                    "kitchencounter"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    223
+                ],
+                "names": [
+                    "bookshelf"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    221,
+                    222
+                ],
+                "names": [
+                    "kitchencounter",
+                    "kitchencounter"
+                ]
+            }
         },
         {
             "task_goal": {
@@ -573,14 +877,25 @@
             "groundtruth_object_ids": [
                 232,
                 233,
-                86,
-                289,
                 243,
                 244,
-                210,
-                221,
-                222,
                 102,
+                86,
+                210,
+                199
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                231,
+                231,
+                223,
+                223,
+                232,
+                233,
+                243,
+                244,
+                102,
+                86,
+                210,
                 199
             ],
             "selected_objects_id": [
@@ -615,18 +930,49 @@
                 "bedroom",
                 "toaster"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
+                    289,
+                    231,
                     50,
-                    126,
-                    231
+                    222,
+                    221,
+                    126
                 ],
                 "names": [
+                    "coffeetable",
+                    "toaster",
+                    "bedroom",
+                    "kitchencounter",
+                    "kitchencounter",
+                    "kitchen"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    223
+                ],
+                "names": [
+                    "bookshelf"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    289,
+                    50,
+                    126,
+                    221,
+                    222
+                ],
+                "names": [
+                    "coffeetable",
                     "bedroom",
                     "kitchen",
-                    "toaster"
+                    "kitchencounter",
+                    "kitchencounter"
                 ]
             }
         },
@@ -640,8 +986,6 @@
             "groundtruth_object_ids": [
                 232,
                 233,
-                86,
-                289,
                 121,
                 165,
                 166,
@@ -649,8 +993,25 @@
                 168,
                 169,
                 260,
-                199,
-                102
+                102,
+                86,
+                199
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                231,
+                231,
+                232,
+                233,
+                121,
+                165,
+                166,
+                167,
+                168,
+                169,
+                260,
+                102,
+                86,
+                199
             ],
             "selected_objects_id": [
                 232,
@@ -690,20 +1051,47 @@
                 "door",
                 "door"
             ],
-            "failure_counts": "1",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
+                    289,
                     145,
                     50,
-                    126,
-                    146
+                    146,
+                    126
                 ],
                 "names": [
+                    "coffeetable",
                     "door",
                     "bedroom",
-                    "kitchen",
-                    "door"
+                    "door",
+                    "kitchen"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    231
+                ],
+                "names": [
+                    "toaster"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    289,
+                    145,
+                    50,
+                    146,
+                    126
+                ],
+                "names": [
+                    "coffeetable",
+                    "door",
+                    "bedroom",
+                    "door",
+                    "kitchen"
                 ]
             }
         },
@@ -729,9 +1117,30 @@
                 273,
                 336,
                 383,
-                165,
                 181,
-                162
+                165,
+                162,
+                163
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                67,
+                68,
+                75,
+                76,
+                83,
+                84,
+                91,
+                103,
+                104,
+                228,
+                233,
+                273,
+                336,
+                383,
+                181,
+                165,
+                162,
+                163
             ],
             "selected_objects_id": [
                 67,
@@ -785,12 +1194,11 @@
                 "floor",
                 "rug"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
                     131,
-                    163,
                     122,
                     135,
                     146,
@@ -799,7 +1207,25 @@
                 ],
                 "names": [
                     "kitchentable",
-                    "stove",
+                    "rug",
+                    "kitchentable",
+                    "kitchencounter",
+                    "floor",
+                    "tvstand"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    131,
+                    122,
+                    135,
+                    146,
+                    26,
+                    157
+                ],
+                "names": [
+                    "kitchentable",
                     "rug",
                     "kitchentable",
                     "kitchencounter",
@@ -835,12 +1261,6 @@
                 275,
                 380,
                 381,
-                158,
-                159,
-                210,
-                211,
-                280,
-                390,
                 59,
                 60,
                 65,
@@ -851,11 +1271,66 @@
                 86,
                 89,
                 101,
-                165,
                 225,
                 226,
                 227,
                 385,
+                158,
+                165,
+                215
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                158,
+                158,
+                158,
+                159,
+                159,
+                159,
+                210,
+                210,
+                211,
+                211,
+                280,
+                280,
+                280,
+                280,
+                390,
+                390,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                224,
+                229,
+                230,
+                234,
+                235,
+                236,
+                261,
+                262,
+                264,
+                265,
+                275,
+                380,
+                381,
+                59,
+                60,
+                65,
+                70,
+                73,
+                78,
+                81,
+                86,
+                89,
+                101,
+                225,
+                226,
+                227,
+                385,
+                158,
+                165,
                 215
             ],
             "selected_objects_id": [
@@ -950,9 +1425,32 @@
                 "kitchen",
                 "character"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    1,
+                    390,
+                    11,
+                    210,
+                    211,
+                    22,
+                    280,
+                    159
+                ],
+                "names": [
+                    "character",
+                    "bookshelf",
+                    "kitchen",
+                    "bookshelf",
+                    "bookshelf",
+                    "floor",
+                    "bookshelf",
+                    "bookshelf"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     1,
                     11,
@@ -975,12 +1473,23 @@
             "groundtruth_object_ids": [
                 176,
                 177,
-                162,
                 181,
                 225,
                 226,
                 227,
                 385,
+                162,
+                215
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                176,
+                177,
+                181,
+                225,
+                226,
+                227,
+                385,
+                162,
                 215
             ],
             "selected_objects_id": [
@@ -1009,9 +1518,20 @@
                 "kitchen",
                 "livingroom"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    11,
+                    183
+                ],
+                "names": [
+                    "kitchen",
+                    "livingroom"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     11,
                     183
@@ -1031,7 +1551,14 @@
             "groundtruth_object_ids": [
                 176,
                 177,
-                162
+                162,
+                163
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                176,
+                177,
+                162,
+                163
             ],
             "selected_objects_id": [
                 176,
@@ -1049,18 +1576,27 @@
                 "kitchencounter",
                 "kitchencounterdrawer"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
                     152,
-                    146,
-                    163
+                    146
                 ],
                 "names": [
                     "kitchencounterdrawer",
-                    "kitchencounter",
-                    "stove"
+                    "kitchencounter"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    152,
+                    146
+                ],
+                "names": [
+                    "kitchencounterdrawer",
+                    "kitchencounter"
                 ]
             }
         },
@@ -1080,11 +1616,26 @@
                 85,
                 90,
                 102,
-                165,
                 176,
                 177,
-                162,
-                181
+                181,
+                165,
+                162
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                66,
+                69,
+                74,
+                77,
+                82,
+                85,
+                90,
+                102,
+                176,
+                177,
+                181,
+                165,
+                162
             ],
             "selected_objects_id": [
                 66,
@@ -1126,9 +1677,26 @@
                 "kitchencounterdrawer",
                 "kitchen"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    131,
+                    135,
+                    11,
+                    146,
+                    152
+                ],
+                "names": [
+                    "kitchentable",
+                    "kitchentable",
+                    "kitchen",
+                    "kitchencounter",
+                    "kitchencounterdrawer"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     131,
                     135,
@@ -1156,10 +1724,21 @@
                 134,
                 137,
                 139,
-                104,
                 51,
                 52,
                 65,
+                104,
+                72
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                133,
+                134,
+                137,
+                139,
+                51,
+                52,
+                65,
+                104,
                 72
             ],
             "selected_objects_id": [
@@ -1184,8 +1763,9 @@
                 "peach",
                 "kitchentable"
             ],
-            "failure_counts": "0",
-            "difference": "False"
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
+            "difference groundtruth_object_ids_with_indirect_objects": "True"
         },
         {
             "task_goal": {
@@ -1203,7 +1783,6 @@
                 143,
                 246,
                 326,
-                104,
                 144,
                 145,
                 221,
@@ -1211,10 +1790,40 @@
                 224,
                 225,
                 247,
-                269,
                 51,
                 52,
                 65,
+                104,
+                269,
+                72
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                109,
+                212,
+                212,
+                212,
+                212,
+                212,
+                110,
+                125,
+                126,
+                127,
+                128,
+                143,
+                246,
+                326,
+                144,
+                145,
+                221,
+                222,
+                224,
+                225,
+                247,
+                51,
+                52,
+                65,
+                104,
+                269,
                 72
             ],
             "selected_objects_id": [
@@ -1264,7 +1873,18 @@
                 "kitchentable"
             ],
             "failure_counts": "None",
-            "difference": "False"
+            "difference groundtruth_object_ids": "True",
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    212,
+                    109
+                ],
+                "names": [
+                    "bookshelf",
+                    "microwave"
+                ]
+            }
         },
         {
             "task_goal": {
@@ -1278,7 +1898,6 @@
                 141,
                 142,
                 199,
-                104,
                 144,
                 145,
                 221,
@@ -1286,6 +1905,28 @@
                 224,
                 225,
                 247,
+                104,
+                269
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                212,
+                212,
+                212,
+                212,
+                212,
+                123,
+                140,
+                141,
+                142,
+                199,
+                144,
+                145,
+                221,
+                222,
+                224,
+                225,
+                247,
+                104,
                 269
             ],
             "selected_objects_id": [
@@ -1324,9 +1965,28 @@
                 "kitchen",
                 "livingroom"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    11,
+                    268
+                ],
+                "names": [
+                    "kitchen",
+                    "livingroom"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    212
+                ],
+                "names": [
+                    "bookshelf"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     11,
                     268
@@ -1349,14 +2009,28 @@
                 134,
                 137,
                 139,
-                104,
                 123,
                 140,
                 141,
                 142,
                 199,
                 322,
-                323
+                323,
+                104
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                133,
+                134,
+                137,
+                139,
+                123,
+                140,
+                141,
+                142,
+                199,
+                322,
+                323,
+                104
             ],
             "selected_objects_id": [
                 104,
@@ -1398,9 +2072,28 @@
                 "floor",
                 "floor"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    72,
+                    11,
+                    268,
+                    13,
+                    269,
+                    363
+                ],
+                "names": [
+                    "kitchentable",
+                    "kitchen",
+                    "livingroom",
+                    "floor",
+                    "coffeetable",
+                    "floor"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     72,
                     11,
@@ -1440,13 +2133,35 @@
                 239,
                 240,
                 241,
-                103,
                 63,
                 66,
-                72,
                 51,
                 52,
-                65
+                65,
+                103,
+                72
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                47,
+                48,
+                231,
+                232,
+                233,
+                234,
+                235,
+                236,
+                237,
+                238,
+                239,
+                240,
+                241,
+                63,
+                66,
+                51,
+                52,
+                65,
+                103,
+                72
             ],
             "selected_objects_id": [
                 47,
@@ -1496,9 +2211,20 @@
                 "floor",
                 "kitchen"
             ],
-            "failure_counts": "1",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    11,
+                    13
+                ],
+                "names": [
+                    "kitchen",
+                    "floor"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     11,
                     13
@@ -1520,12 +2246,23 @@
                 99,
                 183,
                 184,
-                156,
                 213,
-                157,
                 95,
                 168,
-                169
+                169,
+                156,
+                157
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                99,
+                183,
+                184,
+                213,
+                95,
+                168,
+                169,
+                156,
+                157
             ],
             "selected_objects_id": [
                 99,
@@ -1550,7 +2287,8 @@
                 "fridge"
             ],
             "failure_counts": "None",
-            "difference": "True"
+            "difference groundtruth_object_ids": "True",
+            "difference groundtruth_object_ids_with_indirect_objects": "True"
         },
         {
             "task_goal": {
@@ -1562,9 +2300,18 @@
             "groundtruth_object_ids": [
                 159,
                 160,
-                138,
                 209,
-                208
+                208,
+                138
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                158,
+                158,
+                159,
+                160,
+                209,
+                208,
+                138
             ],
             "selected_objects_id": [
                 159,
@@ -1588,8 +2335,8 @@
                 "kitchencounter",
                 "dishwasher"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
                     162,
@@ -1600,6 +2347,19 @@
                 "names": [
                     "microwave",
                     "toaster",
+                    "dishwasher",
+                    "kitchencounter"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    162,
+                    156,
+                    150
+                ],
+                "names": [
+                    "microwave",
                     "dishwasher",
                     "kitchencounter"
                 ]
@@ -1618,11 +2378,24 @@
                 182,
                 185,
                 186,
-                156,
                 95,
                 168,
                 169,
                 206,
+                156,
+                138
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                98,
+                100,
+                182,
+                185,
+                186,
+                95,
+                168,
+                169,
+                206,
+                156,
                 138
             ],
             "selected_objects_id": [
@@ -1653,9 +2426,18 @@
                 "mincedmeat",
                 "bookshelf"
             ],
-            "failure_counts": "1",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    140
+                ],
+                "names": [
+                    "bookshelf"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     140
                 ],
@@ -1673,12 +2455,22 @@
             "env_id": 4,
             "groundtruth_object_ids": [
                 212,
-                157,
                 95,
                 168,
                 169,
-                156,
                 208,
+                157,
+                156,
+                138
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                212,
+                95,
+                168,
+                169,
+                208,
+                157,
+                156,
                 138
             ],
             "selected_objects_id": [
@@ -1705,9 +2497,20 @@
                 "livingroom",
                 "tvstand"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    11,
+                    30
+                ],
+                "names": [
+                    "livingroom",
+                    "tvstand"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     11,
                     30
@@ -1729,12 +2532,23 @@
                 99,
                 183,
                 184,
-                156,
                 212,
-                157,
                 95,
                 168,
-                169
+                169,
+                156,
+                157
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                99,
+                183,
+                184,
+                212,
+                95,
+                168,
+                169,
+                156,
+                157
             ],
             "selected_objects_id": [
                 99,
@@ -1768,9 +2582,26 @@
                 "desk",
                 "tvstand"
             ],
-            "failure_counts": "3",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    138,
+                    11,
+                    140,
+                    29,
+                    30
+                ],
+                "names": [
+                    "kitchentable",
+                    "livingroom",
+                    "bookshelf",
+                    "desk",
+                    "tvstand"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     138,
                     11,
@@ -1796,15 +2627,25 @@
             "env_id": 5,
             "groundtruth_object_ids": [
                 243,
-                186,
                 215,
                 218,
-                189,
                 64,
                 224,
                 322,
-                106,
-                282
+                186,
+                189,
+                106
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                243,
+                215,
+                218,
+                64,
+                224,
+                322,
+                186,
+                189,
+                106
             ],
             "selected_objects_id": [
                 243,
@@ -1832,13 +2673,26 @@
                 "coffeetable",
                 "bathroom"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
+                    282,
                     11
                 ],
                 "names": [
+                    "coffeetable",
+                    "bathroom"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    282,
+                    11
+                ],
+                "names": [
+                    "coffeetable",
                     "bathroom"
                 ]
             }
@@ -1852,12 +2706,20 @@
             "groundtruth_object_ids": [
                 215,
                 218,
-                189,
                 64,
                 224,
                 322,
-                106,
-                282
+                189,
+                106
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                215,
+                218,
+                64,
+                224,
+                322,
+                189,
+                106
             ],
             "selected_objects_id": [
                 215,
@@ -1893,8 +2755,8 @@
                 "floor",
                 "floor"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
                     162,
@@ -1902,6 +2764,7 @@
                     69,
                     201,
                     74,
+                    282,
                     11,
                     186
                 ],
@@ -1911,6 +2774,30 @@
                     "bedroom",
                     "rug",
                     "floor",
+                    "coffeetable",
+                    "bathroom",
+                    "kitchentable"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    162,
+                    163,
+                    69,
+                    201,
+                    74,
+                    282,
+                    11,
+                    186
+                ],
+                "names": [
+                    "kitchen",
+                    "floor",
+                    "bedroom",
+                    "rug",
+                    "floor",
+                    "coffeetable",
                     "bathroom",
                     "kitchentable"
                 ]
@@ -1926,16 +2813,29 @@
             "groundtruth_object_ids": [
                 215,
                 218,
-                189,
                 64,
                 224,
                 322,
-                106,
-                282,
                 54,
                 217,
                 220,
-                240
+                240,
+                189,
+                106
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                239,
+                215,
+                218,
+                64,
+                224,
+                322,
+                54,
+                217,
+                220,
+                240,
+                189,
+                106
             ],
             "selected_objects_id": [
                 215,
@@ -1973,20 +2873,47 @@
                 "desk",
                 "kitchentable"
             ],
-            "failure_counts": "0",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
                 "ids": [
-                    283,
-                    186,
+                    69,
                     11,
-                    69
+                    282,
+                    186,
+                    283
                 ],
                 "names": [
-                    "desk",
-                    "kitchentable",
+                    "bedroom",
                     "bathroom",
-                    "bedroom"
+                    "coffeetable",
+                    "kitchentable",
+                    "desk"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    239
+                ],
+                "names": [
+                    "microwave"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    69,
+                    11,
+                    282,
+                    186,
+                    283
+                ],
+                "names": [
+                    "bedroom",
+                    "bathroom",
+                    "coffeetable",
+                    "kitchentable",
+                    "desk"
                 ]
             }
         },
@@ -1999,13 +2926,25 @@
             "groundtruth_object_ids": [
                 1001,
                 1002,
-                186,
                 54,
                 217,
                 220,
                 240,
-                106,
-                282
+                186,
+                106
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                235,
+                235,
+                239,
+                1001,
+                1002,
+                54,
+                217,
+                220,
+                240,
+                186,
+                106
             ],
             "selected_objects_id": [
                 335,
@@ -2035,8 +2974,8 @@
                 "microwave",
                 "bathroom"
             ],
-            "failure_counts": "1",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "groundtruth_not_in_selected": {
                 "ids": [
                     1001,
@@ -2051,15 +2990,42 @@
                 "ids": [
                     11,
                     235,
-                    239,
+                    335,
                     336,
-                    335
+                    239,
+                    282
                 ],
                 "names": [
                     "bathroom",
                     "fridge",
-                    "microwave",
                     null,
+                    null,
+                    "microwave",
+                    "coffeetable"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "groundtruth_with_indirect_objects_not_in_selected": {
+                "ids": [
+                    1001,
+                    1002
+                ],
+                "names": [
+                    "beer",
+                    "beer"
+                ]
+            },
+            "selected_not_in_groundtruth_with_indirect_objects": {
+                "ids": [
+                    336,
+                    282,
+                    11,
+                    335
+                ],
+                "names": [
+                    null,
+                    "coffeetable",
+                    "bathroom",
                     null
                 ]
             }
@@ -2073,12 +3039,21 @@
             "env_id": 5,
             "groundtruth_object_ids": [
                 243,
-                186,
                 216,
                 219,
-                189,
                 215,
-                218
+                218,
+                186,
+                189
+            ],
+            "groundtruth_object_ids_with_indirect_objects": [
+                243,
+                216,
+                219,
+                215,
+                218,
+                186,
+                189
             ],
             "selected_objects_id": [
                 243,
@@ -2104,9 +3079,22 @@
                 "rug",
                 "kitchencounterdrawer"
             ],
-            "failure_counts": "1",
-            "difference": "True",
+            "failure_counts": "None",
+            "difference groundtruth_object_ids": "True",
             "selected_not_in_groundtruth": {
+                "ids": [
+                    201,
+                    162,
+                    195
+                ],
+                "names": [
+                    "rug",
+                    "kitchen",
+                    "kitchencounterdrawer"
+                ]
+            },
+            "difference groundtruth_object_ids_with_indirect_objects": "True",
+            "selected_not_in_groundtruth_with_indirect_objects": {
                 "ids": [
                     201,
                     162,

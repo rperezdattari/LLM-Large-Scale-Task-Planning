@@ -93,4 +93,4 @@ exp_7 = {'policy type': 'mcts_2',
          'filter objects': True}
 
 experiments = [exp_1, exp_2, exp_1_2, exp_2_2, exp_1_3, exp_2_3, exp_1_4, exp_2_4, exp_1_5, exp_2_5]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
-# experiments = [exp_2_2]  
+# experiments = [exp_2]  
