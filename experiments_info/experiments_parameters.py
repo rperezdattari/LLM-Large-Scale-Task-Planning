@@ -6,7 +6,7 @@
 exp_1 = {'policy type': 'LLM',
          'policy execution': 'online',
          'LLM model': 'gpt-4o',
-         'Dataset': '5task',
+         'Dataset': '1task',
          'filter objects': True}
 
 exp_2 = {'policy type': 'LLM',
@@ -15,11 +15,61 @@ exp_2 = {'policy type': 'LLM',
          'LLM model': 'gpt-3.5-turbo-1106',
          'filter objects': True}
 
+exp_1_2 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'LLM model': 'gpt-4o',
+         'Dataset': '2task',
+         'filter objects': True}
+
+exp_2_2 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'Dataset': '2task',
+         'LLM model': 'gpt-3.5-turbo-1106',
+         'filter objects': True}
+
+exp_1_3 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'LLM model': 'gpt-4o',
+         'Dataset': '3task',
+         'filter objects': True}
+
+exp_2_3 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'Dataset': '3task',
+         'LLM model': 'gpt-3.5-turbo-1106',
+         'filter objects': True}
+
+exp_1_4 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'LLM model': 'gpt-4o',
+         'Dataset': '4task',
+         'filter objects': True}
+
+exp_2_4 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'Dataset': '4task',
+         'LLM model': 'gpt-3.5-turbo-1106',
+         'filter objects': True}
+
+exp_1_5 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'LLM model': 'gpt-4o',
+         'Dataset': '5task',
+         'filter objects': True}
+
+exp_2_5 = {'policy type': 'LLM',
+         'policy execution': 'online',
+         'Dataset': '5task',
+         'LLM model': 'gpt-3.5-turbo-1106',
+         'filter objects': True}
+
 exp_3 = {'policy type': 'mcts',
          'policy execution': 'offline',
          'LLM model': 'gpt-4o',
          'Dataset': '5task',
          'filter objects': True}
+
+
 
 exp_4 = {'policy type': 'mcts',
          'policy execution': 'offline',
@@ -42,4 +92,5 @@ exp_7 = {'policy type': 'mcts_2',
          'LLM model': 'gpt-3.5-turbo-1106',
          'filter objects': True}
 
-experiments = [exp_1]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
+experiments = [exp_1, exp_2, exp_1_2, exp_2_2, exp_1_3, exp_2_3, exp_1_4, exp_2_4, exp_1_5, exp_2_5]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
+# experiments = [exp_2_2]  

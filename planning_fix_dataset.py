@@ -36,7 +36,8 @@ def parse_args():
 
 
 def get_filtered_objects(graph, goal_language, LLM_model):
-    file_name = 'results/filtered_objects/' + goal_language.replace(' ', '_') + '_' + LLM_model + '.pk'
+    # file_name = 'results/filtered_objects/' + goal_language.replace(' ', '_') + '_' + LLM_model + '.pk'
+    file_name = 'results_exp/filtered_objects/' + goal_language.replace(' ', '_') + '_' + LLM_model + '.pk'
     # Check if file exists
     if os.path.isfile(file_name):
         # Load if exists
@@ -44,18 +45,25 @@ def get_filtered_objects(graph, goal_language, LLM_model):
             loaded_dict = pickle.load(file)
         selected_objects_id = loaded_dict['selected objects id']
         selected_objects_names = loaded_dict['selected objects names']
+        failure_count = None
         print('Filtered objects file existed and loaded!')
     else:
         # Filter objects and save them
         language_filter = LanguageFilter(graph, goal_language, LLM_model)
-        selected_objects_id, selected_objects_names = language_filter.filter_graph()  # get ids objects used for planning
+        selected_objects_id, selected_objects_names, failure_count = language_filter.filter_graph()  # get ids objects used for planning
         save_dict = {'selected objects id': selected_objects_id,
                      'selected objects names': selected_objects_names}
-        with open(file_name, 'wb') as file:  # save filtered objects
-            pickle.dump(save_dict, file)
-        print('Objects filtered and saved!')
-
-    return selected_objects_id, selected_objects_names
+        try:
+            with open(file_name, 'wb') as file:  # save filtered objects
+                pickle.dump(save_dict, file)
+            print('Objects filtered and saved!')
+        except OSError as e:
+            if e.errno == 36:
+                print(f"Error: File name too long: '{file_name}'")
+                # Handle the long file name error (e.g., log it, truncate it, etc.)
+            else:
+                raise  # Re-raise the exception if it's not the specific OSError we expect
+    return selected_objects_id, selected_objects_names, failure_count
 
 
 
@@ -110,13 +118,23 @@ def parse_language_from_goal_script(goal_script, goal_num, init_graph, template=
 
 if __name__ == "__main__":
     # Iterate through every experiment
+
+
+   
     for experiment in experiments:
+         # Initialize the log dictionary
+        log_data = {
+            "experiment_results": []
+        }
+
+
         # Get experiment parameters
         policy_type = experiment['policy type']
         policy_execution = experiment['policy execution']
         LLM_model = experiment['LLM model']
         filter_objects = experiment['filter objects']
         dataset_type = experiment['Dataset']
+        
         if dataset_type == '1task':
             from experiments_info.tasks_dataset_1task import tasks
         elif dataset_type == '2task':
@@ -132,84 +150,49 @@ if __name__ == "__main__":
 
         args = parse_args()
 
-        #### Following lines currently not used
-        file_path = f'../llm-mcts/vh/dataset/env_task_set_500_{args.mode}.pik'  # f'../llm-mcts/vh/dataset/env_task_set_10_simple_seen.pik'
+        # Following lines currently not used
+        file_path = f'../llm-mcts/vh/dataset/env_task_set_500_{args.mode}.pik'  
         # env_task_set = pickle.load(open(file_path, 'rb'))
         executable_args = {
             'file_name': "/home/zhaoting/miniconda3/envs/llm_filter_planning/lib/python3.8/site-packages/virtualhome/simulation/unity_simulator/linux_exec/linux_exec.v2.3.0.x86_64",
             'x_display': "1",
             'no_graphics': False
         }
-        ####
-        # filename = 'gen_data/dataset/test_env_set_help.pik'
         
-        # filename = 'gen_data/dataset/new_train_set_2_subtasks.pik'
-        # with open(filename, 'rb') as file:
-        #     # Load the object from the file
-        #     dataset_list = pickle.load(file)
-
-        # # 'env_id', 'init_graph'
-        
-        # for env in dataset_list:
-        #     g = env['init_graph']
-        #     id2node = {node['id']: node['class_name'] for node in g['nodes']}
-        #     cloth_ids = [node['id'] for node in g['nodes'] if node['class_name'] in ["clothespile"]]
-        #     g['nodes'] = [node for node in g['nodes'] if node['id'] not in cloth_ids]
-        #     g['edges'] = [edge for edge in g['edges'] if edge['from_id'] not in cloth_ids and edge['to_id'] not in cloth_ids]
-
         results = []
         succ, total = 0, 0
 
         # Iterate through every evaluation task
         for task in tasks:
-        # new_train_set_2_subtasks: 2 is not able to be used because the 'holds' action is not considered in parse_language_from_goal_script
-        # for test_data_id in range(3, 13):
-        # for test_data_id in range(44, 45):
             # Get task goal
             task_goal = task['goal'][0]
             env_id = task['id']
             print("---------------------------------------------")
             print("task goal: ", task_goal, "env id: ", env_id)
-            # env_id = dataset_list[test_data_id]['env_id']
-            # task_goal = dataset_list[test_data_id]['task_goal'][0]
-            # # graph = dataset_list[test_data_id]['init_graph']
-            # graph = dataset_list[test_data_id]['init_graph']
+
             from utils import find_nodes
-            # print("find nodes of initial graph apple: ", find_nodes(graph,class_name= 'bellpepper'))
-            # print("graph nodes: ", len(graph['nodes']), len(graph['edges']))
-            # print("graph: ", graph.)
-            # print("init_rooms: ", dataset_list[test_data_id]['init_rooms'])
 
             # Init virtualhome env
             vhenv = UnityEnvironment(num_agents=1,
-                                     max_episode_length=300,
-                                     port_id=2,
-                                     env_task_set=None,  # env_task_set,#[env_task_set[0]],
-                                     observation_types=['full'],
-                                     use_editor=True,
-                                     task_goal=[task_goal],
-                                     executable_args=executable_args,
-                                     base_port=8080,
-                                     seed=1)
-            # Restart env
-            
-            # vhenv.reset(task_goal=task_goal, init_graph=graph,env_id=env_id)
+                                    max_episode_length=300,
+                                    port_id=2,
+                                    env_task_set=None,  
+                                    observation_types=['full'],
+                                    use_editor=True,
+                                    task_goal=[task_goal],
+                                    executable_args=executable_args,
+                                    base_port=8080,
+                                    seed=1)
+
             vhenv.reset(task_goal=task_goal,env_id=env_id)
 
             # Add beers and restart again TODO: this should not be done, or at least not here
             graph = vhenv.add_beers()
 
-            # obs = vhenv.reset(task_goal=task_goal, init_graph=graph, env_id=env_id, add_character=True)
+            obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)
+            # Get valid actions
+            valid_actions = vhenv.get_valid_action(obs)
 
-            # to do, needs to find the map from the task in the dataset to the task that is consistent with the obs
-            # 1. target (such as dishwasher) has different id
-            # 2. missing objects, try to see whether we can add the missing objects into the environment
-
-            # interested_item_list = ['fridge', 'tv', 'apple', 'chips', 'cupcake', 'pudding', 'whippedcream', 'pie', 'candybar', 'crackers', 'breadslice', 'bananas', 'lime', 'peach', 'plum',
-            #                         'cereal', 'juice', 'milk', 'carrot', 'salad', 'mincedmeat', 'bellpepper', 'poundcake', 'chocolatesyrup', 'creamybuns', 'salmon', 'book', 'bookshelf']
-            # interested_item_list_clean_kicten = ['kitchencounter', 'dishwasher', "coffeetable", 'kitchentable', 'fridge', 'mug', 'plate', 'dishbowl', 'wineglass', 'condimentbottle', 'fryingpan', 'cutleryknife', 'cutleryfork']
-            # for item in interested_item_list:
-            #     print(item, " find nodes of obs: ", find_nodes(graph,class_name= item))
             goal_language = get_goal_language(task_goal, graph)
             print('Goal language:', goal_language) 
 
@@ -223,8 +206,6 @@ if __name__ == "__main__":
                     if item not in seen:
                         flattened_obs__list.append(item)
                         seen.add(item)
-            # obs_list = [item for sublist in obs_list for item in sublist]
-            # obs_list = [item for subgoal, subgoal_count in task_goal.items() for item in parse_language_from_goal_script_output_object(subgoal, subgoal_count, graph, template=0)]
 
             print("obs_list: ",flattened_obs__list)
             
@@ -235,5 +216,69 @@ if __name__ == "__main__":
                 groundtruth_object_ids = groundtruth_object_ids + object_ids
                 print("find nodes of initial graph apple: ", len(object_nodes), object_ids)
             print("groundtruth_object_ids: ", groundtruth_object_ids)
-
             
+            failure_counts = None
+            if filter_objects:
+                selected_objects_id, selected_objects_names, failure_counts = get_filtered_objects(obs, goal_language, LLM_model)
+                filtered_valid_actions = filter_valid_actions(valid_actions, selected_objects_id)
+                print("selected_objects_names: ", selected_objects_names)
+                print("selected_objects_id: ", selected_objects_id)
+                print("failure_counts: ", failure_counts)
+            else:
+                selected_objects_id = []
+                filtered_valid_actions = []
+                selected_objects_names = []
+
+            # Analyse the difference between groundtruth list and LLM-generated list
+            difference_log = {
+                "task_goal": task_goal,
+                "env_id": env_id,
+                "groundtruth_object_ids": groundtruth_object_ids,
+                "selected_objects_id": selected_objects_id,
+                "selected_objects_names": selected_objects_names
+            }
+            
+            difference_log["failure_counts"] = str(failure_counts)
+
+            if groundtruth_object_ids == selected_objects_id:
+                print("The lists are the same.")
+                difference_log["difference"] = str(False)
+            else:
+                groundtruth_not_in_selected = list(set(groundtruth_object_ids) - set(selected_objects_id))
+                selected_not_in_groundtruth = list(set(selected_objects_id) - set(groundtruth_object_ids))
+
+                def find_corresponding_name_via_ID(id):
+                    for node in graph['nodes']:
+                        if node['id'] == int(id):
+                            return node['class_name']
+                    
+                groundtruth_not_in_selected_objName = [find_corresponding_name_via_ID(one_id) for one_id in groundtruth_not_in_selected]
+                selected_not_in_groundtruth_objName = [find_corresponding_name_via_ID(one_id) for one_id in selected_not_in_groundtruth]
+                
+                print("The lists are different.")
+                difference_log["difference"] = str(True)
+                if groundtruth_not_in_selected:
+                    print("Items in groundtruth_object_ids but not in selected_objects_id:", groundtruth_not_in_selected, " name: ", groundtruth_not_in_selected_objName)
+                    difference_log["groundtruth_not_in_selected"] = {
+                        "ids": groundtruth_not_in_selected,
+                        "names": groundtruth_not_in_selected_objName
+                    }
+                if selected_not_in_groundtruth:
+                    print("Items in selected_objects_id but not in groundtruth_object_ids:", selected_not_in_groundtruth, " name: ", selected_not_in_groundtruth_objName)
+                    difference_log["selected_not_in_groundtruth"] = {
+                        "ids": selected_not_in_groundtruth,
+                        "names": selected_not_in_groundtruth_objName
+                    }
+
+            # Append the result to the log dictionary
+            log_data["experiment_results"].append(difference_log)
+
+        # Write the log data to a JSON file
+        log_file_path = "results_exp/filtered_objects_evaluation/" + "results_FilterObject_policy_type_dataSet_%s_LLM_%s.json" \
+                            % (dataset_type, LLM_model)
+        with open(log_file_path, 'w') as log_file:
+            json.dump(log_data, log_file, indent=4)
+
+        print(f"Experiment log saved to {log_file_path}")
+
+                

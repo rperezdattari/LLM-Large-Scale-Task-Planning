@@ -240,6 +240,7 @@ class LanguageFilter:
         selected_objects_ids = filtered_objects_id  # this list accumulates the objects selected by the LLM
         selected_objects_names = filtered_objects_names
 
+        failure_count = None
         # Expand the graph iteratively while filtering objects
         for i in range(max_iterations):
             # Find objects interacting, i.e., connected in the graph, with the filtered objects
@@ -293,18 +294,32 @@ class LanguageFilter:
             # Get objects names and ids
             filtered_objects_names = []
             filtered_objects_ids = []
+            # for object in filtered_objects:
+            #     print("object: ",object)
+            #     name = object.split(' ')[0]
+            #     id = int(object.split(' ')[1].replace('.', '')[1:-1])
+            #     filtered_objects_names.append(name)
+            #     filtered_objects_ids.append(id)
+
+            failure_count = 0  # Initialize the failure counter
+
             for object in filtered_objects:
-                print("object: ",object)
-                name = object.split(' ')[0]
-                id = int(object.split(' ')[1].replace('.', '')[1:-1])
-                filtered_objects_names.append(name)
-                filtered_objects_ids.append(id)
+                try:
+                    print("object: ", object)
+                    name = object.split(' ')[0]
+                    id = int(object.split(' ')[1].replace('.', '')[1:-1])
+                    filtered_objects_names.append(name)
+                    filtered_objects_ids.append(id)
+                except (ValueError, IndexError) as e:
+                    print(f"Error processing object '{object}': {e}")
+                    failure_count += 1  # Increment the failure count
+
 
             # Append newly selected objects to selected list
             selected_objects_ids += filtered_objects_ids
             selected_objects_names += filtered_objects_names
 
-        return selected_objects_names, selected_objects_ids
+        return selected_objects_names, selected_objects_ids, failure_count
 
     def get_categories_objects(self):
         # Get categories corresponding to objects in observation
@@ -352,7 +367,7 @@ class LanguageFilter:
         filtered_objects_names, filtered_objects_id = get_graph_info_from_objects_names(self.full_graph, filtered_objects)
         # ipdb.set_trace()
         # Filter 3: Select interacting objects relevant for the task
-        filtered_interactions_names, filtered_interactions_ids = self.filter_interactions(filtered_objects_id, filtered_objects_names)
+        filtered_interactions_names, filtered_interactions_ids, failure_count = self.filter_interactions(filtered_objects_id, filtered_objects_names)
         # ipdb.set_trace()
         # Selected objects: combination of filtered objects and their filtered interacting objects
         ids_selected_combined = filtered_objects_id + filtered_interactions_ids
@@ -361,4 +376,4 @@ class LanguageFilter:
         # Remove duplicates
         ids_selected_combined, names_selected_combined = remove_duplicates_and_corresponding_elements(ids_selected_combined,
                                                                                                       names_selected_combined)
-        return ids_selected_combined, names_selected_combined
+        return ids_selected_combined, names_selected_combined, failure_count
