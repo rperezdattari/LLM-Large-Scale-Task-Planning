@@ -66,6 +66,32 @@ exp_2_5 = {'policy type': 'LLM',
 exp_3 = {'policy type': 'mcts',
          'policy execution': 'offline',
          'LLM model': 'gpt-4o',
+         'Dataset': '1task',
+         'filter objects': True}
+
+exp_3_2 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4o',
+         'Dataset': '2task',
+         'filter objects': True}
+
+exp_3_3 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4o',
+         'Dataset': '3task',
+         'filter objects': True}
+
+
+exp_3_4 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4o',
+         'Dataset': '4task',
+         'filter objects': True}
+
+
+exp_3_5 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4o',
          'Dataset': '5task',
          'filter objects': True}
 
@@ -74,8 +100,33 @@ exp_3 = {'policy type': 'mcts',
 exp_4 = {'policy type': 'mcts',
          'policy execution': 'offline',
          'LLM model': 'gpt-4-1106-preview',
+         'Dataset': '1task',
+         'filter objects': False}
+
+exp_4_2 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4-1106-preview',
+         'Dataset': '2task',
+         'filter objects': False}
+
+exp_4_3 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4-1106-preview',
+         'Dataset': '3task',
+         'filter objects': False}
+
+exp_4_4 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4-1106-preview',
+         'Dataset': '4task',
+         'filter objects': False}
+
+exp_4_5 = {'policy type': 'mcts',
+         'policy execution': 'offline',
+         'LLM model': 'gpt-4-1106-preview',
          'Dataset': '5task',
          'filter objects': False}
+
 
 exp_5 = {'policy type': 'mcts',
          'policy execution': 'offline',
@@ -92,5 +143,8 @@ exp_7 = {'policy type': 'mcts_2',
          'LLM model': 'gpt-3.5-turbo-1106',
          'filter objects': True}
 
-experiments = [exp_1, exp_2, exp_1_2, exp_2_2, exp_1_3, exp_2_3, exp_1_4, exp_2_4, exp_1_5, exp_2_5]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
-# experiments = [exp_2]  
+# experiments = [exp_1, exp_2, exp_1_2, exp_2_2, exp_1_3, exp_2_3, exp_1_4, exp_2_4, exp_1_5, exp_2_5]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
+# experiments = [exp_1_3, exp_1_4, exp_1_5]  
+# experiments = [exp_1_4, exp_3, exp_3_2, exp_3_3, exp_3_4, exp_3_5, exp_4, exp_4_2, exp_4_3, exp_4_4, exp_4_5] 
+experiments = [exp_2, exp_2_2, exp_2_3, exp_2_4, exp_2_5, exp_4, exp_4_2, exp_4_3, exp_4_4, exp_4_5] 
+# experiments = [exp_3_5]  

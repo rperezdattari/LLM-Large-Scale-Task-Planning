@@ -13,6 +13,8 @@ import os
 from experiments_info.experiments_parameters import experiments
 
 from test_mcts_agents import MCTS_agent
+from environment.utils_environment import get_goal_language, filter_valid_actions, parse_language_from_goal_script_output_object
+
 
 
 
@@ -35,8 +37,34 @@ def parse_args():
     return parser.parse_args()
 
 
+# def get_filtered_objects(graph, goal_language, LLM_model):
+#     file_name = 'results/filtered_objects/' + goal_language.replace(' ', '_') + '_' + LLM_model + '.pk'
+#     # Check if file exists
+#     if os.path.isfile(file_name):
+#         # Load if exists
+#         with open(file_name, 'rb') as file:
+#             loaded_dict = pickle.load(file)
+#         selected_objects_id = loaded_dict['selected objects id']
+#         selected_objects_names = loaded_dict['selected objects names']
+#         print("selected_objects_id: ", selected_objects_id, " selected_objects_names: ", selected_objects_names)
+#         print('Filtered objects file existed and loaded!')
+#     else:
+#         # Filter objects and save them
+#         language_filter = LanguageFilter(graph, goal_language, LLM_model)
+#         selected_objects_id, selected_objects_names = language_filter.filter_graph()  # get ids objects used for planning
+#         save_dict = {'selected objects id': selected_objects_id,
+#                      'selected objects names': selected_objects_names}
+#         with open(file_name, 'wb') as file:  # save filtered objects
+#             pickle.dump(save_dict, file)
+#         print('Objects filtered and saved!')
+
+#     return selected_objects_id, selected_objects_names
+
+
 def get_filtered_objects(graph, goal_language, LLM_model):
-    file_name = 'results/filtered_objects/' + goal_language.replace(' ', '_') + '_' + LLM_model + '.pk'
+    # file_name = 'results/filtered_objects/' + goal_language.replace(' ', '_') + '_' + LLM_model + '.pk'
+    LLM_model = 'gpt-4o'
+    file_name = 'results_exp/filtered_objects/' + goal_language.replace(' ', '_') + '_' + LLM_model + '.pk'
     # Check if file exists
     if os.path.isfile(file_name):
         # Load if exists
@@ -44,20 +72,25 @@ def get_filtered_objects(graph, goal_language, LLM_model):
             loaded_dict = pickle.load(file)
         selected_objects_id = loaded_dict['selected objects id']
         selected_objects_names = loaded_dict['selected objects names']
-        print("selected_objects_id: ", selected_objects_id, " selected_objects_names: ", selected_objects_names)
+        failure_count = None
         print('Filtered objects file existed and loaded!')
     else:
         # Filter objects and save them
         language_filter = LanguageFilter(graph, goal_language, LLM_model)
-        selected_objects_id, selected_objects_names = language_filter.filter_graph()  # get ids objects used for planning
+        selected_objects_id, selected_objects_names, failure_count = language_filter.filter_graph()  # get ids objects used for planning
         save_dict = {'selected objects id': selected_objects_id,
                      'selected objects names': selected_objects_names}
-        with open(file_name, 'wb') as file:  # save filtered objects
-            pickle.dump(save_dict, file)
-        print('Objects filtered and saved!')
-
-    return selected_objects_id, selected_objects_names
-
+        try:
+            with open(file_name, 'wb') as file:  # save filtered objects
+                pickle.dump(save_dict, file)
+            print('Objects filtered and saved!')
+        except OSError as e:
+            if e.errno == 36:
+                print(f"Error: File name too long: '{file_name}'")
+                # Handle the long file name error (e.g., log it, truncate it, etc.)
+            else:
+                raise  # Re-raise the exception if it's not the specific OSError we expect
+    return selected_objects_id, selected_objects_names, failure_count
 
 if __name__ == "__main__":
     # Iterate through every experiment
@@ -186,10 +219,89 @@ if __name__ == "__main__":
 
             # Get filtered objects and filtered valid actions actions from graph and goal
             if filter_objects:
-                selected_objects_id, selected_objects_names = get_filtered_objects(obs, goal_language, LLM_model)
+                selected_objects_id, selected_objects_names, _ = get_filtered_objects(obs, goal_language, LLM_model)
+                print("selected_objects_names: ", selected_objects_names)
+                # print("filtered_valid_actions: ", filtered_valid_actions)
+
+                obs_list = [parse_language_from_goal_script_output_object(subgoal, subgoal_count, graph, template=0) for subgoal, subgoal_count in task_goal.items()]
+
+                # Flatten the list and remove duplicates
+                seen = set()
+                flattened_obs__list = []
+                for sublist in obs_list:
+                    for item in sublist:
+                        if item not in seen:
+                            flattened_obs__list.append(item)
+                            seen.add(item)
+
+                objects_name = []
+                targets_id = []  # such as the id of table or fridge
+
+                # Iterate through the list and classify each item
+                for item in flattened_obs__list:
+                    if item is None:
+                        continue
+                    elif item.isdigit():
+                        targets_id.append(int(item))
+                    else:
+                        objects_name.append(item)
+                
+                groundtruth_object_ids = []
+                groundtruth_object_ids_with_indirect_objects = []
+                print("objects_name: ", objects_name)
+                for object_name in objects_name:
+                    object_nodes = find_nodes(graph,class_name= object_name)
+                    # print("object_nodes", object_nodes)
+                    object_ids = [object_nodes[i]['id'] for i in range(0,  len(object_nodes))]
+
+                    # print("find_edges_from: ", find_edges_from(graph, object_ids[0]))
+                    # print("find_edges_to: ", find_edges_to(graph, object_ids[0]))
+                    for obj_id in object_ids:
+                        from utils import find_edges_from, find_edges_to
+                        edges_from = find_edges_from(graph, obj_id)
+                        # print("find_edges_from: ", edges_from)
+
+                        for edge in edges_from:
+                            relation, obj = edge
+                            if relation == 'INSIDE' and obj['category'] != 'Rooms':
+                                groundtruth_object_ids_with_indirect_objects.append(obj['id'])
+
+                    groundtruth_object_ids = groundtruth_object_ids + object_ids
+                    print("find nodes of initial graph apple: ", len(object_nodes), object_ids)
+                groundtruth_object_ids = groundtruth_object_ids + targets_id
+                groundtruth_object_ids_with_indirect_objects = groundtruth_object_ids_with_indirect_objects + groundtruth_object_ids
+                print("groundtruth_object_ids: ", groundtruth_object_ids)
+
+                groundtruth_not_in_selected = list(set(groundtruth_object_ids_with_indirect_objects) - set(selected_objects_id))
+                selected_not_in_groundtruth = list(set(selected_objects_id) - set(groundtruth_object_ids_with_indirect_objects))
+
+                if groundtruth_not_in_selected:
+                    selected_objects_id_raw = groundtruth_object_ids_with_indirect_objects + selected_not_in_groundtruth
+                    # remove redundent id 
+                    selected_objects_id_raw = list(set(selected_objects_id_raw))
+
+                    print("selected_objects_id_raw: ", selected_objects_id_raw)
+                    selected_objects_names = []
+                    selected_objects_id = []
+                    for obj in selected_objects_id_raw:
+                        exisit_flag = False
+                        for node in graph['nodes']:
+                            if node['id'] == int(obj):
+                                tar_node = node
+                                tar_id = node['id']
+                                selected_objects_names.append(tar_node['class_name'])
+                                exisit_flag = True
+                                selected_objects_id.append(obj)
+                                break
+
+                        # print("obj: ", obj, "exisit_flag: ", exisit_flag )
+                
+                print("size selected_objects_names: ", len(selected_objects_names), " size of selected_objects_id: ", len(selected_objects_id))
                 filtered_valid_actions = filter_valid_actions(valid_actions, selected_objects_id)
                 print("selected_objects_names: ", selected_objects_names)
                 print("filtered_valid_actions: ", filtered_valid_actions)
+            
+                
             else:
                 selected_objects_id = []
                 filtered_valid_actions = []
@@ -249,6 +361,7 @@ if __name__ == "__main__":
             # Iterate over episode
             if policy_type == 'LLM':
                 args.max_depth = 60
+                # args.max_depth = 50
             for j in range(args.max_depth + 1):  # TODO: check this, currently being set w.r.t. MCTS, but it could be different in the case of LLM
                 print(" ---------------------- Step: ", j, " ---------------------- ")
 
@@ -317,6 +430,18 @@ if __name__ == "__main__":
             time.sleep(1)
             print('succ rate: ', succ / total)
 
+            # save the data more frequently, to avoid the loss of experiment data
+            result_tmp = results
+            result_tmp.append({'successes': succ,
+                        'total': total,
+                        'success rate': succ / total})
+            results_json = json.dumps(result_tmp)
+            # Save results
+            json_file_name = "results_filter_%s_policy_type_%s_policy_execution_%s_dataSet_%s_LLM_%s.json" \
+                            % (str(filter_objects), policy_type, policy_execution, dataset_type, LLM_model)
+            with open('results_exp/evaluations/' + json_file_name, 'w', encoding='utf-8') as file:
+                json.dump(results_json, file, ensure_ascii=False, indent=4)
+
         results.append({'successes': succ,
                         'total': total,
                         'success rate': succ / total})
@@ -325,5 +450,5 @@ if __name__ == "__main__":
         # Save results
         json_file_name = "results_filter_%s_policy_type_%s_policy_execution_%s_dataSet_%s_LLM_%s.json" \
                          % (str(filter_objects), policy_type, policy_execution, dataset_type, LLM_model)
-        with open('results/evaluations/' + json_file_name, 'w', encoding='utf-8') as file:
+        with open('results_exp/evaluations/' + json_file_name, 'w', encoding='utf-8') as file:
             json.dump(results_json, file, ensure_ascii=False, indent=4)

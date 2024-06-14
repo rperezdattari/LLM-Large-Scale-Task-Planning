@@ -136,7 +136,6 @@ tasks_env_5 = [
     {'goal': {0: {'on_plate_106': 2}}, 'id': 5},
     {'goal': {0: {'on_cutleryfork_189': 2}}, 'id': 5},
     {'goal': {0: {'on_cutleryknife_189': 2}}, 'id': 5},
-    {'goal': {0: {'on_cutleryknife_189': 2}}, 'id': 5},
     {'goal': {0: {'on_whippedcream_189': 1}}, 'id': 5},
     {'goal': {0: {'on_milk_189': 1}}, 'id': 5},
     {'goal': {0: {'on_carrot_186': 1}}, 'id': 5}
