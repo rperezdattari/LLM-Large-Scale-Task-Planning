@@ -78,8 +78,8 @@ tasks_env_3 = [
     {'goal': {0: {'inside_waterglass_104': 2}}, 'id': 3},
     {'goal': {0: {'inside_wineglass_104': 1}}, 'id': 3},
     {'goal': {0: {'inside_cutleryfork_104': 2}}, 'id': 3},
-    {'goal': {0: {'inside_apple_103': 3}}, 'id': 3},
-    {'goal': {0: {'on_book_269': 3}}, 'id': 3},
+    {'goal': {0: {'inside_apple_103': 2}}, 'id': 3},
+    # {'goal': {0: {'on_book_269': 3}}, 'id': 3},
     {'goal': {0: {'on_crackers_72': 1}}, 'id': 3},
     {'goal': {0: {'on_peach_72': 1}}, 'id': 3}
 ]

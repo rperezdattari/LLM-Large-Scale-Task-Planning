@@ -1,7 +1,7 @@
 import json
 from experiments_info.experiments_parameters import *
 
-experiments_list = [exp_1_4]
+experiments_list = [exp_1_5]
 # experiments_list = [exp_3_4]
 for experiment_i in experiments_list:
     # Get experiment parameters
@@ -31,7 +31,7 @@ for experiment_i in experiments_list:
     i = 0
     for experiment in experiment_data:
         print("i: ", i)
-        i = i + 1
+        i = i + 0.5
         if len(experiment) == 3:
             print("success rate: ", experiment)
         else:
