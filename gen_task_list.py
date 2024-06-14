@@ -61,7 +61,7 @@ tasks_env_1 = [
     {'goal': {0: {'on_breadslice_86': 2}}, 'id': 1},
     {'goal': {0: {'on_apple_210': 1}}, 'id': 1},
     {'goal': {0: {'on_creamybuns_210': 2}}, 'id': 1},
-    {'goal': {0: {'inside_book_83': 2}}, 'id': 1}
+    # {'goal': {0: {'inside_book_83': 2}}, 'id': 1}
 ]
 tasks_env_2 = [
     {'goal': {0: {'turnon_163': 1}}, 'id': 2},
@@ -105,7 +105,7 @@ tasks_env_5 = [
     {'goal': {0: {'on_cutleryfork_189': 2}}, 'id': 5},
     {'goal': {0: {'on_cutleryknife_189': 2}}, 'id': 5},
     {'goal': {0: {'on_cutleryknife_189': 2}}, 'id': 5},
-    {'goal': {0: {'on_whippedcream_189': 1}}, 'id': 5},
+    # {'goal': {0: {'on_whippedcream_189': 1}}, 'id': 5},
     {'goal': {0: {'on_milk_189': 1}}, 'id': 5},
     {'goal': {0: {'on_carrot_186': 1}}, 'id': 5}
 ]
@@ -119,7 +119,7 @@ all_tasks_env = [
     (5, tasks_env_5)
 ]
 
-num_subtasks = 5
+num_subtasks = 4
 
 total_task_number = 30
 tasks_per_env = total_task_number // len(all_tasks_env)
