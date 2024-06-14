@@ -1,7 +1,7 @@
 import json
 from experiments_info.experiments_parameters import *
 
-experiments_list = [exp_1_5]
+experiments_list = [exp_1_3]
 # experiments_list = [exp_3_4]
 for experiment_i in experiments_list:
     # Get experiment parameters

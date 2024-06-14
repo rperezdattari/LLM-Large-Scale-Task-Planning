@@ -147,4 +147,4 @@ exp_7 = {'policy type': 'mcts_2',
 # experiments = [exp_1_3, exp_1_4, exp_1_5]  
 # experiments = [exp_1_4, exp_3, exp_3_2, exp_3_3, exp_3_4, exp_3_5, exp_4, exp_4_2, exp_4_3, exp_4_4, exp_4_5] 
 # experiments = [exp_2, exp_2_2, exp_2_3, exp_2_4, exp_2_5, exp_4, exp_4_2, exp_4_3, exp_4_4, exp_4_5] 
-experiments = [exp_1_5]  
+experiments = [exp_1_3]  
