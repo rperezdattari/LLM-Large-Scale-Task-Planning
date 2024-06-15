@@ -1,8 +1,8 @@
 import json
 from experiments_info.experiments_parameters import *
 
-experiments_list = [exp_1_3]
-# experiments_list = [exp_3_4]
+# experiments_list = [exp_1_3]
+experiments_list = [exp_3_3]
 for experiment_i in experiments_list:
     # Get experiment parameters
     policy_type = experiment_i['policy type']
@@ -13,7 +13,8 @@ for experiment_i in experiments_list:
     # Load JSON data from a local file
     json_file_name = "results_filter_%s_policy_type_%s_policy_execution_%s_dataSet_%s_LLM_%s.json" \
                             % (str(filter_objects), policy_type, policy_execution, dataset_type, LLM_model)
-    with open('results_exp/evaluations/' + json_file_name, 'r', encoding='utf-8') as file:
+    # with open('results_exp/evaluations/' + json_file_name, 'r', encoding='utf-8') as file:
+    with open('results_exp raw2/evaluations/' + json_file_name, 'r', encoding='utf-8') as file:
         experiment_data = json.load(file)
 
     # Initialize variables to store the results
