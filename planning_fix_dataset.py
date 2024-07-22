@@ -16,7 +16,6 @@ from test_mcts_agents import MCTS_agent
 
 from utils import find_edges_from, find_edges_to
 
-
 import ipdb
 
 def parse_args():
@@ -63,6 +62,7 @@ def get_filtered_objects(graph, goal_language, LLM_model):
                 # Handle the long file name error (e.g., log it, truncate it, etc.)
             else:
                 raise  # Re-raise the exception if it's not the specific OSError we expect
+    
     return selected_objects_id, selected_objects_names, failure_count
 
 
@@ -162,6 +162,10 @@ if __name__ == "__main__":
         results = []
         succ, total = 0, 0
 
+        log_inside_objs_info = []
+
+        list_of_objects =[]
+        list_of_node_num = []
         # Iterate through every evaluation task
         for task in tasks:
             # Get task goal
@@ -188,6 +192,20 @@ if __name__ == "__main__":
 
             # Add beers and restart again TODO: this should not be done, or at least not here
             graph = vhenv.add_beers()
+
+            print("graph node size: ", len(graph['nodes']))
+            filtered_graph_count = []
+            for obj_i in range(0, len(graph['nodes'])):
+                obj_name = graph['nodes'][obj_i]['class_name']
+                object_node = graph['nodes'][obj_i]
+                
+                # print("['category'] : ", object_node['category'], " name: ",selected_objects_names_raw[selected_obj_i] )
+                if object_node['category'] != 'Rooms' and obj_name != "floor" and obj_name != "ceiling" \
+                    and obj_name != "door" and obj_name != "wall" and obj_name != "doorjamb" and obj_name != "kitchen":
+                    filtered_graph_count.append(obj_name)
+            print("graph node size filtered:  ", len(filtered_graph_count))
+            list_of_node_num.append(len(filtered_graph_count))
+            # filter out irrelevant objects, the same as we did for filtered_objects_from_LLMs
 
             obs = vhenv.reset(task_goal=task_goal, environment_graph=graph, env_id=env_id, add_character=False)
             # Get valid actions
@@ -239,6 +257,12 @@ if __name__ == "__main__":
                         if relation == 'INSIDE' and obj['category'] != 'Rooms':
                             groundtruth_object_ids_with_indirect_objects.append(obj['id'])
 
+                            # record the objects 
+                            print("inside obj: ", obj['class_name'], " obj: ", object_name, " id: ",obj_id)
+                            log_inside_objs_info.append({'inside_obj': obj['class_name'], 'obj': object_name, 'obj_id': obj_id, 'env_id': env_id })
+
+                            # 'class_name'
+
                 groundtruth_object_ids = groundtruth_object_ids + object_ids
                 print("find nodes of initial graph apple: ", len(object_nodes), object_ids)
             groundtruth_object_ids = groundtruth_object_ids + targets_id
@@ -248,7 +272,24 @@ if __name__ == "__main__":
 
             failure_counts = None
             if filter_objects:
-                selected_objects_id, selected_objects_names, failure_counts = get_filtered_objects(obs, goal_language, LLM_model)
+                selected_objects_id_raw, selected_objects_names_raw, failure_counts = get_filtered_objects(obs, goal_language, LLM_model)
+                # filter out the irrelevant objects, such as "floor", "ceiling", "door", "wall", "doorjamb", "kitchen"
+                selected_objects_id = []
+                selected_objects_names = []
+                for selected_obj_i in range(0, len(selected_objects_names_raw)):
+                    obj_name = selected_objects_names_raw[selected_obj_i]
+                    object_nodes = find_nodes(graph,class_name=obj_name)
+                    if len(object_nodes) > 0:
+                        object_node = object_nodes[0]
+                    else:
+                        print(" no objects in this graph: ", obj_name)
+                    # print("['category'] : ", object_node['category'], " name: ",selected_objects_names_raw[selected_obj_i] )
+                    if object_node['category'] != 'Rooms' and obj_name != "floor" and obj_name != "ceiling" \
+                        and obj_name != "door" and obj_name != "wall" and obj_name != "doorjamb" and obj_name != "kitchen":
+                        selected_objects_id.append(selected_objects_id_raw[selected_obj_i])
+                        selected_objects_names.append(selected_objects_names_raw[selected_obj_i])
+                    
+
                 filtered_valid_actions = filter_valid_actions(valid_actions, selected_objects_id)
                 print("selected_objects_names: ", selected_objects_names)
                 print("selected_objects_id: ", selected_objects_id)
@@ -333,12 +374,15 @@ if __name__ == "__main__":
 
             # Append the result to the log dictionary
             log_data["experiment_results"].append(difference_log)
-
+        log_data["list_of_node_num"] = list_of_node_num
+        # print("log_inside_objs_info: ", log_inside_objs_info)
         # Write the log data to a JSON file
-        log_file_path = "results_exp/filtered_objects_evaluation/" + "results_FilterObject_policy_type_dataSet_%s_LLM_%s.json" \
+        log_file_path = "results_exp/filtered_objects_evaluation_removewalls/" + "results_FilterObject_policy_type_dataSet_%s_LLM_%s.json" \
                             % (dataset_type, LLM_model)
         with open(log_file_path, 'w') as log_file:
             json.dump(log_data, log_file, indent=4)
+        
+        print("list_of_node_num: ", list_of_node_num)
 
         print(f"Experiment log saved to {log_file_path}")
 

@@ -143,8 +143,8 @@ exp_7 = {'policy type': 'mcts_2',
          'LLM model': 'gpt-3.5-turbo-1106',
          'filter objects': True}
 
-# experiments = [exp_1, exp_2, exp_1_2, exp_2_2, exp_1_3, exp_2_3, exp_1_4, exp_2_4, exp_1_5, exp_2_5]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
+experiments = [exp_1, exp_2, exp_1_2, exp_2_2, exp_1_3, exp_2_3, exp_1_4, exp_2_4, exp_1_5, exp_2_5]  #exp_1, exp_2, exp_3, exp_4, exp_5, exp_6]
 # experiments = [exp_1_3, exp_1_4, exp_1_5]  
 # experiments = [exp_1_4, exp_3, exp_3_2, exp_3_3, exp_3_4, exp_3_5, exp_4, exp_4_2, exp_4_3, exp_4_4, exp_4_5] 
 # experiments = [exp_2, exp_2_2, exp_2_3, exp_2_4, exp_2_5, exp_4, exp_4_2, exp_4_3, exp_4_4, exp_4_5] 
-experiments = [exp_3_3]  
+# experiments = [exp_1_5]  
